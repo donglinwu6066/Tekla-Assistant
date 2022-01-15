@@ -13,7 +13,8 @@ import resources.variables;
 
 public class DatabaseGenerator {
 	public static void main(String argv[]) {
-		Utils.terminal();
+		if(argv[0] != "hide")
+			Utils.terminal("DatabaseGenerator");
 
 		DataReader dateReader = new DataReader();
 		// required password
@@ -22,7 +23,7 @@ public class DatabaseGenerator {
 			Pair<String, String> locker = dateReader.getLocker();
 			// check host name and uuid
 			if(!gatekeeper.isPassed(locker.getFirst(), locker.getSecond())) {
-				System.out.println("Fail to passed verification");
+				System.out.println("Fail to passed verification(驗證失敗)");
 				return;
 			}
 		}
@@ -41,13 +42,36 @@ public class DatabaseGenerator {
 		File symFolder = new File(pathStr);
 		Hashtable<String, String> hashToSpec = Utils.componentToSpecification(nclData);
 		Hashtable<String, Float> hashToLength = Utils.componentToLength(nclData);
-		System.out.println(hashToSpec);
-		//System.out.println(hashToLength);
+
 		ArrayList<SpecSegmentation> symData = dateReader.sym(symFolder, hashToSpec, hashToLength);
 		excelWriter.writeSYM(symData);
 		
 		excelWriter.save();
-		System.out.println("Success");
+		System.out.println("DatabaseGenerator successes\n");
 
+	}
+	public void run(){
+		DataReader dateReader = new DataReader();
+		// ncl
+		String pathStr = dateReader.toFolder(variables.PROJECT_ROOT, variables.PROJECT_NAME, variables.NCL_ROOT);
+		System.out.println(pathStr);
+		File nclFolder = new File(pathStr);
+		ArrayList<Component> nclData = dateReader.ncl(nclFolder);
+		
+		pathStr = dateReader.toPath(variables.PROJECT_ROOT, variables.PROJECT_NAME, variables.PROJECT_NAME + ".xlsx");
+		ExcelWriter excelWriter = new ExcelWriter(pathStr);
+		excelWriter.writeNCL(nclData);
+		
+		// sym
+		pathStr = dateReader.toFolder(variables.PROJECT_ROOT, variables.PROJECT_NAME, variables.SYM_ROOT);
+		File symFolder = new File(pathStr);
+		Hashtable<String, String> hashToSpec = Utils.componentToSpecification(nclData);
+		Hashtable<String, Float> hashToLength = Utils.componentToLength(nclData);
+
+		ArrayList<SpecSegmentation> symData = dateReader.sym(symFolder, hashToSpec, hashToLength);
+		excelWriter.writeSYM(symData);
+		
+		excelWriter.save();
+		System.out.println("DatabaseGenerator successes("+ variables.COMPONENTS_SPECIFICATION+"與"+variables.PREDICTION+"報表完成)\n");
 	}
 }

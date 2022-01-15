@@ -20,6 +20,7 @@ public class Component {
 		this.texture = texture;
 	}
 	// print
+	@Override
 	public String toString() {
         return "component: " + component + 
         		", material: " + material +
@@ -43,6 +44,7 @@ public class Component {
 class ComponentSort implements Comparator<Component> 
 { 
 	// ascending
+	@Override
 	public int compare(Component a, Component b) 
 	{
 		// e.g. 76M192 vs 77M29

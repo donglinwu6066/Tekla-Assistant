@@ -70,8 +70,9 @@
 					maven-assembly-plugin
 				</artifactId>
 				<executions>
+				<!-- first executable jar -->
+				<!-- 
 					<execution>
-						<!-- first executable jar -->
 						<id>
 							data-gen
 						</id>
@@ -103,7 +104,7 @@
 								single
 							</goal>
 						</goals>
-					</execution>
+					</execution>-->
 					<execution>
 						<!-- second executable jar -->
 						<id>
@@ -127,6 +128,40 @@
 							</appendAssemblyId>
 							<finalName>
 								KeyGenerator
+							</finalName>
+						</configuration>
+						<phase>
+							package
+						</phase>
+						<goals>
+							<goal>
+								single
+							</goal>
+						</goals>
+					</execution>
+					<execution>
+						<!-- third executable jar -->
+						<id>
+							CNC-gen
+						</id>
+						<configuration>
+							<archive>
+								<manifest>
+									<mainClass>
+										CNCGenerator
+									</mainClass>
+								</manifest>
+							</archive>
+							<descriptorRefs>
+								<descriptorRef>
+									jar-with-dependencies
+								</descriptorRef>
+							</descriptorRefs>
+							<appendAssemblyId>
+								false
+							</appendAssemblyId>
+							<finalName>
+								CNCGenerator
 							</finalName>
 						</configuration>
 						<phase>

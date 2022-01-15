@@ -1,6 +1,7 @@
 package resources;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class SpecSegmentation {
@@ -32,6 +33,7 @@ public class SpecSegmentation {
 		this.remaining = length;
 	}
 	// print
+	@Override
 	public String toString() {
 		return "Specification: " + specification + 
 				", length: " + length +
@@ -51,4 +53,35 @@ public class SpecSegmentation {
 	public int getComponentLength() {
 		return componentList.size();
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof SpecSegmentation) {
+			SpecSegmentation specSeg = (SpecSegmentation)obj;
+			return (this.specification.equals(specSeg.specification) &&
+					this.length.equals(specSeg.length) &&
+					this.count.equals(specSeg.count) &&
+					this.componentList.equals(specSeg.componentList));
+		}	
+	    return false;
+	}
+    @Override
+    public int hashCode() {
+           final int prime = 31;
+           int result = 1;
+           result = prime * result
+                        + ((specification == null) ? 0 : specification.hashCode());
+           result = prime * result
+                   + ((length == null) ? 0 : length.hashCode());
+           result = prime * result
+                   + ((componentList == null) ? 0 : componentList.hashCode());
+           result = prime * result
+                   + ((count == null) ? 0 : count.hashCode());
+           result = prime * result
+                   + ((remaining == null) ? 0 : remaining.hashCode());
+           return result;
+    }
+
 }
+
+
