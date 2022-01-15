@@ -1,6 +1,7 @@
 {
     "COMPANY_NAME": "COMPANY_NAME",
     "PROJECT_NAME": "全家台中盟立自動",
+    "OVERRIDE_DATABASE_PREDICTION": true,
     "KEY_FILE_NAME": "data.dat",
     "PROJECT_ROOT": "prj",
     "NCL_ROOT": "ncl",
@@ -12,6 +13,7 @@
     "COMPONENTS_SPECIFICATION": "零件規格",
     "LENGTH": "長度",
     "COUNT": "數量",
+    "SUMMARIZATION": "總計",
     "SPECIFICATION": "規格",
     "SPECIFICATION_LENGTH": "規格尺寸",
     "TEXTURE": "材質",

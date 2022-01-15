@@ -1,4 +1,3 @@
-import java.awt.GraphicsEnvironment;
 import java.io.BufferedWriter;
 import java.io.Console;
 import java.io.File;
@@ -10,26 +9,18 @@ import java.nio.file.Paths;
 
 import resources.Encryption;
 import resources.Gatekeeper;
+import resources.Utils;
 import resources.variables;
 
 public class KeyGenerator {
 	public static void main(String argv[]) {
-		Console console = System.console();
-        if(console == null && !GraphicsEnvironment.isHeadless()){
-            String filename = KeyGenerator.class.getProtectionDomain().getCodeSource().getLocation().toString().substring(6);
-            try {
-				Runtime.getRuntime().exec(new String[]{"cmd","/c","start","cmd","/k","java -jar \"" + filename + "\""});
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-        }
-        
-        char[] passwordArray = console.readPassword("input: ");
+		Console console = Utils.getTerminal("KeyGenerator");
+		
+        char[] passwordArray = console.readPassword("input(輸入): ");
         String password = new String(passwordArray);
         
         if(!variables.PASSWORD.equals(password)) {
-        	System.out.println("no");
+        	System.out.println("no(錯誤)");
         	System.exit(0);
         }
 		try {
@@ -51,6 +42,6 @@ public class KeyGenerator {
 			e.printStackTrace();
 		}
 		
-        System.out.println("success");
+        System.out.println("KeyGenerator successes(KeyGenerator完成)\n");
 	}
 }

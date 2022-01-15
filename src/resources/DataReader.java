@@ -26,8 +26,9 @@ public class DataReader {
 		int count;
 		String specification;
 		String texture;
+		System.out.println("Reading ncl(讀取.ncl)");
 		for(final File f : fileArr) {
-			System.out.println(f);
+			//System.out.println(f);
 			List<String> lineList;
 			try {
 				lineList = Files.readAllLines(Paths.get(f.toString()));
@@ -40,7 +41,7 @@ public class DataReader {
 
 				componentList.add(new Component(component, material, length, count, specification, texture));
 				
-				System.out.println(componentList.get(componentList.size() - 1));
+				//System.out.println(componentList.get(componentList.size() - 1));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -59,9 +60,9 @@ public class DataReader {
 		boolean startFlag = false;
 		// this will be delete later
 		SpecSegmentation item = new SpecSegmentation();
-		
+		System.out.println("Reading sym(讀取.sym)");
 		for(final File f : fileArr) {
-			System.out.println(f.toString());
+			//System.out.println(f.toString());
 			ArrayList<SpecSegmentation> tempList = new ArrayList<SpecSegmentation>();
 			try {
 				BufferedReader br = new BufferedReader(new FileReader(f));
@@ -95,9 +96,7 @@ public class DataReader {
 				if(item.specification.equals("null")) {
 					item.setSpecification(specification);
 				}
-				tempList.add(item);
-				//tempList.remove(0);
-				System.out.println(tempList);
+				//tempList.add(item);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -144,9 +143,7 @@ public class DataReader {
 		
 		try(BufferedReader br = new BufferedReader(new FileReader(variables.KEY_FILE_NAME))) {
 			hostName = Encryption.decode(br.readLine());
-			System.out.println(hostName);
 			uuid = Encryption.decode(br.readLine());
-			System.out.println(uuid);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

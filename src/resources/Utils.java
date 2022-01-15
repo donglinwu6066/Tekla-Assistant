@@ -43,17 +43,38 @@ public class Utils {
 	    	return str;
 	    }
 	}
-	public static void terminal() {
+	public static void terminal(String programName) {
 		// create console for user
     	Console console = System.console();
         if(console == null && !GraphicsEnvironment.isHeadless()){
-            String filename = Utils.class.getProtectionDomain().getCodeSource().getLocation().toString().substring(6);
+            //String filename = Utils.class.getProtectionDomain().getCodeSource().getLocation().toString().substring(6);
+            String filename = programName;
             try {
-				Runtime.getRuntime().exec(new String[]{"cmd","/c","start","cmd","/k","java -jar \"" + filename + "\"", "UTF-8"});
+				Runtime.getRuntime().exec(new String[]{"cmd","/c","start","cmd","/k","java -jar .\\" + filename + ".jar"});
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
         }
+	}
+	public static Console getTerminal(String programName) {
+		// create console for user
+    	Console console = System.console();
+        if(console == null && !GraphicsEnvironment.isHeadless()){
+            //String filename = Utils.class.getProtectionDomain().getCodeSource().getLocation().toString().substring(6);
+            String filename = programName;
+            try {
+				Runtime.getRuntime().exec(new String[]{"cmd","/c","start","cmd","/k","java -jar .\\" + filename + ".jar"});
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        }
+        return console;
+	}
+	public static ArrayList<CompSummarization> summarizePrediction(ArrayList<SpecSegmentation> specList) {
+		ArrayList<CompSummarization> compSummarizationList = new ArrayList<CompSummarization>();
+		
+		return compSummarizationList;
 	}
 }

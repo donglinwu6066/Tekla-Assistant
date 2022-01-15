@@ -1,15 +1,12 @@
 package resources;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import java.util.LinkedHashMap;
+
 import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -17,77 +14,33 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IgnoredErrorType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellReference;
 
-public class ExcelWriter {
-	private String fileName;
-	private Workbook wb;
+public class ExcelWriter extends ExcelBase{
+
 	CellStyle style;
 	Font red_font;
 	final int WIDER_COLUMN_WIDTH = 5000;
 	final int COLUMN_WIDTH = 2500;
+	
 	public ExcelWriter(String fileName){
-		this.fileName = fileName;
-		try {
-			wb = (XSSFWorkbook) getWorkbook(this.fileName);
-
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		super(fileName);
+		
 		this.style = wb.createCellStyle();
 		this.red_font = wb.createFont();
 		red_font.setColor(HSSFColor.HSSFColorPredefined.RED.getIndex());
         style.setFont(red_font);
 	}
-	public Workbook getWorkbook(String path) throws FileNotFoundException, IOException {
-		Workbook wb;
-		if(path == null) 
-			return null;
-		
-		String extString = path.substring(path.lastIndexOf("."));
-		try {
-			File f = new File("F:\\program1.txt");
-			if(!f.exists()) {
-				wb = new XSSFWorkbook();
-				System.out.println("\"" + path + "\" is a wrong extension");
-				System.out.println("create "+ fileName + ".xlsx");
-				return wb;
-			}
-			InputStream is = new FileInputStream(path);
-			if(".xls".equals(extString) && is!=null){
-				wb = new HSSFWorkbook(is);
-			}else if(".xlsx".equals(extString) && is!=null){
-				wb = new XSSFWorkbook(is);
-			}else {
-				wb = new XSSFWorkbook();
-				System.out.println("\"" + path + "\" is a wrong extension");
-				System.out.println("create "+ fileName + ".xlsx");
-				is.close();
-				return wb;
-			}
-			is.close();
-			return wb;
-		} catch (FileNotFoundException e) {
-			String newFileName = path.substring(0, path.lastIndexOf(".")) + ".xlsx";
-			System.out.println(path + " is not found, creating " + newFileName);
-			wb = createWorkbook(newFileName);
-			return wb;
-		}
-		
-	}
+
 	// for component sheet
 	public void writeNCL(ArrayList<Component> ncl) {
 
 		Sheet sheet;
 		if(isSheetExist(variables.COMPONENTS_SPECIFICATION)) {
-			System.out.println("Remove old content from sheet " + variables.COMPONENTS_SPECIFICATION);
+			System.out.println("Remove old content from sheet " + variables.COMPONENTS_SPECIFICATION+ "(移除舊的"+variables.COMPONENTS_SPECIFICATION+"頁面)");
 			removeSheetByName(variables.COMPONENTS_SPECIFICATION);
 		}
+		System.out.println("Create new sheet " + variables.COMPONENTS_SPECIFICATION + "(創造新的"+variables.COMPONENTS_SPECIFICATION+"頁面)");
 		sheet = wb.createSheet(variables.COMPONENTS_SPECIFICATION);
 		// add new COMPONENTS_SPECIFICATION here
 		Row row = null;
@@ -137,9 +90,10 @@ public class ExcelWriter {
 
 		Sheet sheet;
 		if(isSheetExist(variables.PREDICTION)) {
-			System.out.println("Remove old content from sheet " + variables.PREDICTION);
+			System.out.println("Remove old content from sheet " + variables.PREDICTION + "(移除舊的"+variables.PREDICTION+"頁面)");
 			removeSheetByName(variables.PREDICTION);
 		}
+		System.out.println("Create new sheet " + variables.PREDICTION+ "(創造新的"+variables.PREDICTION+"頁面)");
 		sheet = wb.createSheet(variables.PREDICTION);
 		// add new COMPONENTS_SPECIFICATION here
 		Row row = null;
@@ -154,12 +108,11 @@ public class ExcelWriter {
 		for(SpecSegmentation item : sym) {
 			if(MIN_COLUMN < item.getComponentLength()*2){
 				MIN_COLUMN = item.getComponentLength()*2;
-				System.out.println("update len as" + MIN_COLUMN);
 			}
 		}
 		
 		// 4 is for other items
-		for (int i =0 ; i<  MIN_COLUMN + 4 ; i++) {
+		for (int i =0 ; i<  MIN_COLUMN + 5 ; i++) {
 		    sheet.setColumnWidth(i, COLUMN_WIDTH);;
 		}
 		//spec need more space
@@ -188,6 +141,7 @@ public class ExcelWriter {
 		XSSFSheet xsheet = (XSSFSheet)sheet;
 		for(SpecSegmentation item : sym) {
 			ArrayList<Object> info = (ArrayList<Object>) item.getSegInfo();
+			//test new layout
 			for(int i=0 ; i<item.count ; i++) {
 				rowCnt++;
 				row = sheet.createRow(rowCnt);
@@ -195,14 +149,13 @@ public class ExcelWriter {
 				for(Object obj : info) {
 					cell = row.createCell(cellCnt);
 					// odd column is red
-					if(cellCnt%2 == 1 && cellCnt>2) {
+					if(cellCnt%2 == 0 && cellCnt>2) {
 						cell.setCellStyle(style);
 					}
 					if(obj.getClass() == String.class)
 						cell.setCellValue(obj.toString());
 					else if(obj.getClass() == Integer.class) {
 						cell.setCellValue(obj.toString());
-						CellReference cellR = new CellReference(cell);
 					}
 					else if(obj.getClass() == Float.class) {
 						cell.setCellValue(Utils.fmt((float)obj));
@@ -221,30 +174,57 @@ public class ExcelWriter {
 		
 		
 	}
-
-	public Workbook createWorkbook(String fileName) {
-		FileOutputStream fileOut;
-		try {
-			fileOut = new FileOutputStream(fileName);
-			wb = new XSSFWorkbook();
-			fileOut.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	public void writeSum(ArrayList<CompSummarization> sumList) {
+		Sheet sheet;
+		if(isSheetExist(variables.SUMMARIZATION)) {
+			System.out.println("Remove old content from sheet " + variables.SUMMARIZATION + "(移除舊的"+variables.SUMMARIZATION+"頁面)");
+			removeSheetByName(variables.SUMMARIZATION);
+		}
+		System.out.println("Create new sheet " + variables.SUMMARIZATION+ "(創造新的"+variables.SUMMARIZATION+"頁面)");
+		sheet = wb.createSheet(variables.SUMMARIZATION);
+		Row row = null;
+		Cell cell = null;
+		String SUMMARIZATION_MENU[] = {variables.MATERIAL, variables.LENGTH, variables.COUNT};
+		
+		for (int i =0 ; i<  SUMMARIZATION_MENU.length ; i++) {
+		    sheet.setColumnWidth(i, COLUMN_WIDTH);;
+		}
+		int rowCnt = 0;
+		int cellCnt = 0;
+		// write first menu
+		row = sheet.createRow(rowCnt);
+		for(String str : SUMMARIZATION_MENU) {
+			cell = row.createCell(cellCnt);	
+			cell.setCellValue(str);
+			cellCnt += 1;
 		}
 		
-		return wb;
-	}
-	public boolean isSheetExist(String sheetname) {
-		for(Sheet sheet : wb) {
-			sheetname.equals(sheet.getSheetName());
-			return true;
+		for(CompSummarization comSum : sumList) {
+			rowCnt++;
+			cellCnt = 0;
+			row = sheet.createRow(rowCnt);
+			XSSFSheet xsheet = (XSSFSheet)sheet;
+			ArrayList<Object> info = (ArrayList<Object>) comSum.getInfo();
+			for(Object obj : info) {
+				cell = row.createCell(cellCnt);
+				if(obj.getClass() == String.class)
+					cell.setCellValue(obj.toString());
+				else if(obj.getClass() == Integer.class) {
+					cell.setCellValue(obj.toString());
+				}
+				else if(obj.getClass() == Float.class) {
+					cell.setCellValue(Utils.fmt((float)obj));
+				}
+				CellReference cellR = new CellReference(cell);
+				xsheet.addIgnoredErrors(cellR, IgnoredErrorType.NUMBER_STORED_AS_TEXT);
+				cellCnt += 1;
+			}
 		}
-		return false;
 	}
+	
+//	for (Entry<SpecSegmentation, Integer> entry : linkedHashMap.entrySet()) {
+//    System.out.println(entry.getKey() + ":" + entry.getValue().toString());
+//}
 	public void removeSheetByName(String sheetname) {
 		for(int i = 0 ; i<this.wb.getNumberOfSheets() ; i++) {
 			if(sheetname.equals(wb.getSheetName(i))) {
