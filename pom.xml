@@ -9,7 +9,7 @@
 		TeklaAssistant
 	</artifactId>
 	<version>
-		0.0.1
+		1.0
 	</version>
 	<build>
 		<sourceDirectory>
@@ -127,7 +127,7 @@
 								false
 							</appendAssemblyId>
 							<finalName>
-								KeyGenerator
+								KeyGenerator-1.0
 							</finalName>
 						</configuration>
 						<phase>
@@ -161,7 +161,7 @@
 								false
 							</appendAssemblyId>
 							<finalName>
-								CNCGenerator
+								CNCGenerator-1.0
 							</finalName>
 						</configuration>
 						<phase>

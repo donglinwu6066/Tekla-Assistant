@@ -4,14 +4,15 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class Component {
+public class Component implements CellOutput{
 	String component;
 	Integer material;
 	Float length;
 	Integer count;
 	String specification;
 	String texture;
-	Component(String component, int material, float length, int count, String specification, String texture){
+	Component(String component, int material, float length, int count, 
+			String specification, String texture){
 		this.component = component;
 		this.material = material;
 		this.length = length;
@@ -29,7 +30,8 @@ public class Component {
         		", specification: " + specification +
         		", texture: " + texture;
     }
-	public List <Object> getSpecInfo() {
+	@Override
+	public List <Object> getInfo() {
 		List<Object> info = new ArrayList <Object>();
 		info.add(component);
 		info.add(material);

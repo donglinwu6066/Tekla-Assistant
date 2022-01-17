@@ -13,8 +13,7 @@ import resources.variables;
 
 public class DatabaseGenerator {
 	public static void main(String argv[]) {
-		if(argv[0] != "hide")
-			Utils.terminal("DatabaseGenerator");
+		Utils.terminal("DatabaseGenerator");
 
 		DataReader dateReader = new DataReader();
 		// required password
@@ -50,6 +49,7 @@ public class DatabaseGenerator {
 		System.out.println("DatabaseGenerator successes\n");
 
 	}
+	
 	public void run(){
 		DataReader dateReader = new DataReader();
 		// ncl

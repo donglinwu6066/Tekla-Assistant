@@ -1,15 +1,15 @@
 package resources;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
-public class SpecSegmentation {
-	String specification;
-	Float length;
-	ArrayList<Pair<String, Float>> componentList;
-	Integer count;
-	Float remaining;
+public class SpecSegmentation implements CellOutput{
+	private String specification;
+	private Float length;
+	private ArrayList<Pair<String, Float>> componentList;
+	private Float remaining;
+	
+	public Integer count;
 	SpecSegmentation(){
 		this.specification = "null";
 		this.componentList = new ArrayList<Pair<String, Float>>();
@@ -32,6 +32,24 @@ public class SpecSegmentation {
 		this.length = length;
 		this.remaining = length;
 	}
+	public String getSpec() {
+		return specification;
+	};
+	public Float getRemaining() {
+		return remaining;
+	};
+	public float getSpecLength() {
+		return length;
+	}
+	public int getComponentSize() {
+		return componentList.size();
+	}
+	public ArrayList<Pair<String, Float>> getComponentList() {
+		return componentList;
+	}
+	public String getFirstComponent() {
+		return componentList.get(0).getFirst();
+	}
 	// print
 	@Override
 	public String toString() {
@@ -40,7 +58,8 @@ public class SpecSegmentation {
 				", componentList: " + componentList  +
 				", count: " + count;
 	}
-	public List <Object> getSegInfo() {
+	@Override
+	public List <Object> getInfo() {
 		List<Object> info = new ArrayList <Object>();
 		info.add(specification);
 		info.add(length);
@@ -49,9 +68,6 @@ public class SpecSegmentation {
 			info.add(item.getSecond());
 		}
 		return info;
-	}
-	public int getComponentLength() {
-		return componentList.size();
 	}
 	
 	@Override

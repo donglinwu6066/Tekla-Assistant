@@ -7,7 +7,6 @@ import java.net.UnknownHostException;
 import java.lang.Runtime;
 
 public class Gatekeeper {
-	static Encryption encryption;
 	private String hostName;
 	private String uuid;
 
