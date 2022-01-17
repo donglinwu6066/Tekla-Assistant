@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -14,14 +16,38 @@ import resources.variables;
 
 public class KeyGenerator {
 	public static void main(String argv[]) {
-		Console console = Utils.getTerminal("KeyGenerator");
+		String jarName = "";
+		try {
+			String path = KeyGenerator.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			String decodedPath[] = URLDecoder.decode(path, "UTF-8").split("/");
+			int lastToken = decodedPath.length -1;
+			jarName = decodedPath[lastToken].substring(0, decodedPath[lastToken].lastIndexOf('.'));
+		} catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		Console console = Utils.getTerminal(jarName);
+		
 		
         char[] passwordArray = console.readPassword("input(輸入): ");
         String password = new String(passwordArray);
         
         if(!variables.PASSWORD.equals(password)) {
-        	System.out.println("no(錯誤)");
-        	System.exit(0);
+        	boolean exitFlag = true;
+        	
+        	while(true) {
+        		System.out.println("fail(錯誤)");
+            	System.out.println("ctrl + c to exit(按control + c 鍵結束程式)\n");
+            	char[] pwdTry = console.readPassword("input(輸入): ");
+            	String pwd = new String(pwdTry);
+            	if(variables.PASSWORD.equals(pwd)){
+            		exitFlag = false;
+            		break;
+            	}
+        	}
+        	if(exitFlag){
+        		System.exit(0);
+        	}
         }
 		try {
 			Files.deleteIfExists(Paths.get(variables.KEY_FILE_NAME));

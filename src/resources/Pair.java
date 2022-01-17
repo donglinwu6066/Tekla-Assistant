@@ -1,13 +1,19 @@
 package resources;
 
 public class Pair<T, U> {         
-	private final T t;
-	private final U u;
+	private T t;
+	private U u;
 
     public Pair(T t, U u) {         
         this.t= t;
         this.u= u;
 	}
+    public void setFirst(T t) {
+    	this.t = t;
+    }
+    public void setSecond(U u) {
+    	this.u = u;
+    }
     public T getFirst() {
     	return t;
     }

@@ -93,7 +93,7 @@ public class DataReader {
 				}
 				br.close();
 				// add last element
-				if(item.specification.equals("null")) {
+				if(item.getSpec().equals("null")) {
 					item.setSpecification(specification);
 				}
 				//tempList.add(item);
