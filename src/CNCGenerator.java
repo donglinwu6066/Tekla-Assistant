@@ -1,3 +1,5 @@
+import java.io.Console;
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -18,23 +20,31 @@ import resources.variables;
 public class CNCGenerator {
 
 	public static void main(String[] args) {
+		Console console = null;
 		try {
-			String path = KeyGenerator.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			String path = CNCGenerator.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 			String decodedPath[] = URLDecoder.decode(path, "UTF-8").split("/");
 			int lastToken = decodedPath.length -1;
 			String jarName = decodedPath[lastToken].substring(0, decodedPath[lastToken].lastIndexOf('.'));
-			Utils.terminal(jarName);
+			console = Utils.getTerminal(jarName);
 		} catch (UnsupportedEncodingException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
+			System.exit(1);
 		}
 
 		DataReader dateReader = new DataReader();
 		// required password
 		if(variables.REQUIRED_PASSWORD) {
+			File datFile = new File(variables.KEY_FILE_NAME);
+			if(!datFile.exists()) {
+				KeyGenerator keyGen = new KeyGenerator();
+				keyGen.run(console);
+			}
 			Gatekeeper gatekeeper = new Gatekeeper();
 			Pair<String, String> locker = dateReader.getLocker();
 			// check host name and uuid
+			
 			if(!gatekeeper.isPassed(locker.getFirst(), locker.getSecond())) {
 				System.out.println("Fail to passed verification(驗證失敗)");
 				return;
