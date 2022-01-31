@@ -9,7 +9,7 @@
 		TeklaAssistant
 	</artifactId>
 	<version>
-		1.0
+		2.0
 	</version>
 	<build>
 		<sourceDirectory>
@@ -105,8 +105,10 @@
 							</goal>
 						</goals>
 					</execution>-->
+					<!-- second executable jar -->
+					<!-- 
 					<execution>
-						<!-- second executable jar -->
+						
 						<id>
 							key-gen
 						</id>
@@ -127,7 +129,7 @@
 								false
 							</appendAssemblyId>
 							<finalName>
-								KeyGenerator-1.0
+								KeyGenerator-2.0
 							</finalName>
 						</configuration>
 						<phase>
@@ -139,7 +141,9 @@
 							</goal>
 						</goals>
 					</execution>
+					-->
 					<execution>
+						
 						<!-- third executable jar -->
 						<id>
 							CNC-gen
@@ -161,7 +165,7 @@
 								false
 							</appendAssemblyId>
 							<finalName>
-								CNCGenerator-1.0
+								CNCGenerator-2.0
 							</finalName>
 						</configuration>
 						<phase>

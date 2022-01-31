@@ -1,9 +1,17 @@
 package resources;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map.Entry;
+
+
 
 public class SpecSegmentation implements CellOutput{
+	static Integer MAX_A4_COLUMN = 30;
+	static enum listFormat {
+	    COMPACTED, GENERAL
+	}
 	private String specification;
 	private Float length;
 	private ArrayList<Pair<String, Float>> componentList;
@@ -63,13 +71,34 @@ public class SpecSegmentation implements CellOutput{
 		List<Object> info = new ArrayList <Object>();
 		info.add(specification);
 		info.add(length);
-		for(Pair<String, Float> item : componentList) {
-			info.add(item.getFirst());
-			info.add(item.getSecond());
+		if(componentList.size()*2 <= MAX_A4_COLUMN) {
+			for(Pair<String, Float> item : componentList) {
+				info.add(item.getFirst());
+				info.add(item.getSecond());
+			}
+		}
+		else {
+			LinkedHashMap <Pair<String, Float>, Integer> linkedHashMap = compressComponentsList();
+			for (Entry<Pair<String, Float>, Integer> entry : linkedHashMap.entrySet()) {
+				info.add(entry.getKey().getFirst());
+				info.add(entry.getKey().getSecond());
+				info.add(entry.getValue());
+			}
 		}
 		return info;
 	}
-	
+	private LinkedHashMap <Pair<String, Float>, Integer> compressComponentsList(){
+		LinkedHashMap <Pair<String, Float>, Integer> linkedHashMap = new LinkedHashMap <Pair<String, Float>, Integer>();
+		for(Pair<String, Float> item : componentList) {
+			if(!linkedHashMap.containsKey(item)) {
+				linkedHashMap.put(item, 1);
+			} else {
+				int value = linkedHashMap.get(item) +1;
+				linkedHashMap.put(item, value);
+			}
+		}
+		return linkedHashMap;
+	}
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof SpecSegmentation) {

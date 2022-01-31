@@ -42,11 +42,28 @@ public class ExcelReader extends ExcelBase{
 			item.remove(0);
 			// remove remaining
 			item.remove(item.size()-1);
+			// detect prediction format
+			SpecSegmentation.listFormat dataFormat = SpecSegmentation.listFormat.GENERAL;
+			if(item.size()>2 && !item.get(2).contains("M")) {
+				dataFormat = SpecSegmentation.listFormat.COMPACTED;
+			}
 			// add component in pair
 			while(!item.isEmpty()) {
-				specSeg.addComponent(new Pair<String, Float>(item.get(0), Float.parseFloat(item.get(1))));
-				item.remove(0);
-				item.remove(0);
+				if(dataFormat == SpecSegmentation.listFormat.GENERAL) {
+					specSeg.addComponent(new Pair<String, Float>(item.get(0), Float.parseFloat(item.get(1))));
+					item.remove(0);
+					item.remove(0);
+				} else {
+					int count = Integer.parseInt(item.get(2));
+					for(int i=0 ; i<count ; i++) {
+						String component = item.get(0);
+						float length = Float.parseFloat(item.get(1));
+						specSeg.addComponent(new Pair<String, Float>(component, length));
+					}
+					item.remove(0);
+					item.remove(0);
+					item.remove(0);
+				}
 			}
 			
 			if(!linkedHashMap.containsKey(specSeg)) {

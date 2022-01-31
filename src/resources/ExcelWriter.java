@@ -127,16 +127,16 @@ public class ExcelWriter extends ExcelBase{
 		Cell cell = null;
 		int rowCnt = 0;
 		int cellCnt = 0;
-		int MIN_COLUMN = 20;
+		int MIN_COLUMN = SpecSegmentation.MAX_A4_COLUMN;
 		String COMPONENTS_SPECIFICATION_MENU[] = {variables.SPECIFICATION_LENGTH, variables.LENGTH,
 													variables.COMPONENTS, variables.LENGTH,
 													variables.REMAINING, variables.WEIGHT
 													};
-		for(SpecSegmentation item : sym) {
-			if(MIN_COLUMN < item.getComponentSize()*2){
-				MIN_COLUMN = item.getComponentSize()*2;
-			}
-		}
+//		for(SpecSegmentation item : sym) {
+//			if(MIN_COLUMN < item.getComponentSize()*2){
+//				MIN_COLUMN = item.getComponentSize()*2;
+//			}
+//		}
 		
 		// 4 is for other items
 		for (int i =0 ; i<  MIN_COLUMN + 5 ; i++) {
