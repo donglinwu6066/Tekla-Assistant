@@ -33,7 +33,7 @@ public class ExcelWriter extends ExcelBase{
 	private Font redFont;
 	private final int WIDER_COLUMN_WIDTH = 5000;
 	private final int COLUMN_WIDTH = 2500;
-	private final int SHIFT = 50;
+	private final int SHIFT = CellOutput.MAX_ROW;
 	
 	public ExcelWriter(String fileName){
 		super(fileName);
@@ -132,11 +132,6 @@ public class ExcelWriter extends ExcelBase{
 													variables.COMPONENTS, variables.LENGTH,
 													variables.REMAINING, variables.WEIGHT
 													};
-//		for(SpecSegmentation item : sym) {
-//			if(MIN_COLUMN < item.getComponentSize()*2){
-//				MIN_COLUMN = item.getComponentSize()*2;
-//			}
-//		}
 		
 		// 4 is for other items
 		for (int i =0 ; i<  MIN_COLUMN + 5 ; i++) {
@@ -416,7 +411,6 @@ public class ExcelWriter extends ExcelBase{
 			// prepare for next
 			int tableLength = (int)((conn.getInfo().size()+1)/2);
 			positions[leftOrRight].jumpRow(tableLength);
-			
 			// fill content
 			for(int i=1 ; i<tableLength ; i++) {
 				row = sheet.getRow(putRowIdx);

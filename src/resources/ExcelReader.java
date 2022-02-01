@@ -142,8 +142,7 @@ public class ExcelReader extends ExcelBase{
 		while(menuColumns.hasNext()) {
 			wReference.add(menuColumns.next().getStringCellValue());
 		}
-		wReference.remove(wReference.size()-1);
-		
+
 		while (rows.hasNext()) {
 			Row row = rows.next();
 			Iterator<Cell> columns = row.cellIterator();
