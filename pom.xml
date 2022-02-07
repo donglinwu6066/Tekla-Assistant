@@ -9,7 +9,7 @@
 		TeklaAssistant
 	</artifactId>
 	<version>
-		2.0
+		2.2
 	</version>
 	<build>
 		<sourceDirectory>
@@ -165,7 +165,7 @@
 								false
 							</appendAssemblyId>
 							<finalName>
-								CNCGenerator-2.0
+								CNCGenerator-2.2
 							</finalName>
 						</configuration>
 						<phase>

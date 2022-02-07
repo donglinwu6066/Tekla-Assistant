@@ -43,6 +43,9 @@ public class Utils {
 	    	return str;
 	    }
 	}
+	public static boolean isInteger(String s) {
+	    return s.substring(s.indexOf('.')+1).equals("0");
+	}
 	public static void terminal(String programName) {
 		// create console for user
     	Console console = System.console();

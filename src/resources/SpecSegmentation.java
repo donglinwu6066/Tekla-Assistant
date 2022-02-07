@@ -52,6 +52,11 @@ public class SpecSegmentation implements CellOutput{
 	public int getComponentSize() {
 		return componentList.size();
 	}
+	public listFormat getListformat() {
+		if(componentList.size()*2 <= MAX_A4_COLUMN)
+			return listFormat.GENERAL;
+		return listFormat.COMPACTED;
+	}
 	public ArrayList<Pair<String, Float>> getComponentList() {
 		return componentList;
 	}
