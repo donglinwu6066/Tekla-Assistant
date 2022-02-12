@@ -28,9 +28,18 @@ public class ExcelReader extends ExcelBase{
 		while (rows.hasNext()) {
 			ArrayList<String> item = new ArrayList<String>();
 			for(Cell cell: rows.next()) {
-				item.add(cell.getStringCellValue());
+				if(cell.getCellType() == CellType.STRING) {
+					item.add(cell.getStringCellValue());
+				}
+				else if(cell.getCellType() == CellType.NUMERIC) {
+					String tmp = String.valueOf(cell.getNumericCellValue());
+					if(Utils.isInteger(tmp)) {
+						tmp = tmp.substring(0, tmp.indexOf('.'));
+					}
+						item.add(tmp);
+					
+				}
 			}
-			
 			SpecSegmentation specSeg = new SpecSegmentation();
 			// set Specification
 			specSeg.setSpecification(item.get(0));
@@ -41,7 +50,7 @@ public class ExcelReader extends ExcelBase{
 			specSeg.setLength(Float.parseFloat(item.get(0)));
 			item.remove(0);
 			// remove remaining
-			item.remove(item.size()-1);
+			// item.remove(item.size()-1);
 			// detect prediction format
 			SpecSegmentation.listFormat dataFormat = SpecSegmentation.listFormat.GENERAL;
 			if(item.size()>2 && !item.get(2).contains("M")) {
@@ -53,7 +62,7 @@ public class ExcelReader extends ExcelBase{
 					specSeg.addComponent(new Pair<String, Float>(item.get(0), Float.parseFloat(item.get(1))));
 					item.remove(0);
 					item.remove(0);
-				} else {
+				} else{
 					int count = Integer.parseInt(item.get(2));
 					for(int i=0 ; i<count ; i++) {
 						String component = item.get(0);

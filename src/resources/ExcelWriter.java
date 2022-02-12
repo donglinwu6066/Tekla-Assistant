@@ -12,6 +12,10 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.poi.xssf.usermodel.XSSFSheet;
+
+import resources.SpecSegmentation.listFormat;
+
+import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
@@ -165,6 +169,7 @@ public class ExcelWriter extends ExcelBase{
 		XSSFSheet xsheet = (XSSFSheet)sheet;
 		for(SpecSegmentation item : sym) {
 			ArrayList<Object> info = (ArrayList<Object>) item.getInfo();
+			SpecSegmentation.listFormat format = item.getListformat();
 			//test new layout
 			for(int i=0 ; i<item.count ; i++) {
 				rowCnt++;
@@ -188,9 +193,27 @@ public class ExcelWriter extends ExcelBase{
 					xsheet.addIgnoredErrors(cellR, IgnoredErrorType.NUMBER_STORED_AS_TEXT);
 					cellCnt += 1;
 				}
-				// 3 is to locate remaining
+				// remaining formula
+				String strGeneralFormula = "";
+				if(format == listFormat.GENERAL)
+					strGeneralFormula = "B"+(rowCnt+1)+"-D"+(rowCnt+1)+"-F"+(rowCnt+1)+
+										"-H"+(rowCnt+1)+"-J"+(rowCnt+1)+"-L"+(rowCnt+1)+
+										"-N"+(rowCnt+1)+"-P"+(rowCnt+1)+"-R"+(rowCnt+1)+
+										"-T"+(rowCnt+1)+"-V"+(rowCnt+1)+"-X"+(rowCnt+1)+
+										"-Z"+(rowCnt+1)+"-AB"+(rowCnt+1)+"-AD"+(rowCnt+1)+"-AF"+(rowCnt+1);
+				else {
+					strGeneralFormula = "B"+(rowCnt+1)+"-(D"+(rowCnt+1)+"*+E"+(rowCnt+1) +
+							")-(G"+(rowCnt+1)+"*H"+(rowCnt+1)+")-(J"+(rowCnt+1)+"*K"+(rowCnt+1)+
+							")-(M"+(rowCnt+1)+"*N"+(rowCnt+1)+")-(P"+(rowCnt+1)+"*Q"+(rowCnt+1)+
+							")-(S"+(rowCnt+1)+"*T"+(rowCnt+1)+")-(V"+(rowCnt+1)+"*W"+(rowCnt+1)+
+							")-(Y"+(rowCnt+1)+"*Z"+(rowCnt+1)+")-(AB"+(rowCnt+1)+"*AC"+(rowCnt+1)+
+							")-(AE"+(rowCnt+1)+"*AF"+(rowCnt+1)+")";
+				}
+				
+				// 2 is to locate remaining
 				cell = row.createCell(MIN_COLUMN + 2);
-				cell.setCellValue(Utils.fmt((float)item.getRemaining()));
+				cell.setCellFormula(strGeneralFormula);
+//				cell.setCellValue(Utils.fmt((float)item.getRemaining()));
 				CellReference cellR = new CellReference(cell);
 				xsheet.addIgnoredErrors(cellR, IgnoredErrorType.NUMBER_STORED_AS_TEXT);
 			}
@@ -308,6 +331,7 @@ public class ExcelWriter extends ExcelBase{
 	private void fillCNCBlock(Sheet sheet, int shiftIdx, Entry<SpecSegmentation, Integer> entry , String texture) {
 		fillCNCInfo(sheet, shiftIdx, entry, texture);
 		plotCNCTable(sheet, shiftIdx * SHIFT);
+		advancedLayout(sheet, shiftIdx * SHIFT);
 	}
 	private void fillCNCInfo(Sheet sheet, int shiftIdx, Entry<SpecSegmentation, Integer> entry, String texture) {
 		CNCInfo cncInfo = new CNCInfo(shiftIdx, entry, texture);
@@ -417,7 +441,19 @@ public class ExcelWriter extends ExcelBase{
 				putColIdx = positions[leftOrRight].getColumn();
 				for(int j=0 ; j<2 ; j++) {
 					cell = row.getCell(putColIdx);
-					cell.setCellValue(info.get((i*2)-1+j).toString());
+					if(info.get((i*2)-1+j).getClass() == String.class) {
+						cell.setCellValue(info.get((i*2)-1+j).toString());
+					}
+					else if(info.get((i*2)-1+j).getClass() == Integer.class) {
+						cell.setCellValue(info.get((i*2)-1+j).toString());
+					}
+					else if(info.get((i*2)-1+j).getClass() == Float.class) {
+						cell.setCellValue(Utils.fmt((float)info.get((i*2)-1+j)));
+					}
+					else if(info.get((i*2)-1+j).getClass() == Double.class) {
+						cell.setCellValue(Utils.fmt((double)info.get((i*2)-1+j)));
+					}
+//					cell.setCellValue(info.get((i*2)-1+j).toString());
 					XSSFSheet xsheet = (XSSFSheet)sheet;
 					CellReference cellR = new CellReference(cell);
 					xsheet.addIgnoredErrors(cellR, IgnoredErrorType.NUMBER_STORED_AS_TEXT);
@@ -427,6 +463,16 @@ public class ExcelWriter extends ExcelBase{
 				putRowIdx++;
 			}
 		}
+	}
+	private void advancedLayout(Sheet sheet, int shift) {
+		// refer to CNCLocation for more information
+		
+		// for material count
+		Row row = sheet.getRow(11+shift);
+		Cell cell = row.getCell(7);
+		cell.setCellStyle(redStyle);
+		cell = row.getCell(9);
+		cell.setCellStyle(redStyle);
 	}
 	private ArrayList<ConnectionInfo> getCNCConn(ArrayList<CompSummarization> compSumList){
 		ArrayList<ConnectionInfo> CNCConn = new ArrayList<ConnectionInfo>();
