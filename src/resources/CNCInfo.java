@@ -49,17 +49,16 @@ public class CNCInfo implements CellOutput{
 				compSum = compSumList.get(idx);
 				compSum.increase();
 				compSumList.set(idx, compSum);
-				
 			}
 		}
 
 		this.materialCount = entry.getValue();
 		
-		float remaining = 0;
+		float check = 10 + 3;
 		for(CompSummarization comSum : compSumList) {
-			remaining += comSum.useLength();
+			check += comSum.useLength()+3;
 		}
-		this.check = remaining;
+		this.check = check;
 		
 		dNow = new Date( );
 		date = new SimpleDateFormat ("yyyy-MM-dd HH:mm:ss");

@@ -40,6 +40,26 @@ public class Utils {
 		    if(str.charAt(str.lastIndexOf(".")+1) == '0') {
 		    	return str.substring(0, str.lastIndexOf("."));
 		    }
+		    if (str.charAt(0) == '.') {
+		    	str = "0" + str;
+		    }
+	    	return str;
+	    }
+	}
+	public static String fmt(double d)
+	{
+	    if(d == (long) d) {
+	        return String.format("%d",(long)d);
+	    }
+	    else {
+	    	String str_tmp = String.format("%s",(int)((100*d+5))/10);
+	    	String str = str_tmp.substring(0, str_tmp.length()-1) + "." + str_tmp.substring(str_tmp.length()-1);
+		    if(str.charAt(str.lastIndexOf(".")+1) == '0') {
+		    	return str.substring(0, str.lastIndexOf("."));
+		    }
+		    if (str.charAt(0) == '.') {
+		    	str = "0" + str;
+		    }
 	    	return str;
 	    }
 	}

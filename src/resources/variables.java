@@ -58,7 +58,7 @@ public final class variables {
     public static String CONNECTION_CODE;
     static {
         // program define variables
-        PASSWORD = "password";
+        PASSWORD = "atp29563t9906";
         REQUIRED_PASSWORD = true;
 
         // JSON parser object to parse read file
@@ -111,7 +111,7 @@ public final class variables {
             RELEASING_DATE = (String) variablesObject.get("RELEASING_DATE");
             CONNECTION_TYPE = (String) variablesObject.get("CONNECTION_TYPE");
             CONNECTION_CODE = (String) variablesObject.get("CONNECTION_CODE");
-            
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

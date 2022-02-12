@@ -331,6 +331,7 @@ public class ExcelWriter extends ExcelBase{
 	private void fillCNCBlock(Sheet sheet, int shiftIdx, Entry<SpecSegmentation, Integer> entry , String texture) {
 		fillCNCInfo(sheet, shiftIdx, entry, texture);
 		plotCNCTable(sheet, shiftIdx * SHIFT);
+		advancedLayout(sheet, shiftIdx * SHIFT);
 	}
 	private void fillCNCInfo(Sheet sheet, int shiftIdx, Entry<SpecSegmentation, Integer> entry, String texture) {
 		CNCInfo cncInfo = new CNCInfo(shiftIdx, entry, texture);
@@ -440,7 +441,19 @@ public class ExcelWriter extends ExcelBase{
 				putColIdx = positions[leftOrRight].getColumn();
 				for(int j=0 ; j<2 ; j++) {
 					cell = row.getCell(putColIdx);
-					cell.setCellValue(info.get((i*2)-1+j).toString());
+					if(info.get((i*2)-1+j).getClass() == String.class) {
+						cell.setCellValue(info.get((i*2)-1+j).toString());
+					}
+					else if(info.get((i*2)-1+j).getClass() == Integer.class) {
+						cell.setCellValue(info.get((i*2)-1+j).toString());
+					}
+					else if(info.get((i*2)-1+j).getClass() == Float.class) {
+						cell.setCellValue(Utils.fmt((float)info.get((i*2)-1+j)));
+					}
+					else if(info.get((i*2)-1+j).getClass() == Double.class) {
+						cell.setCellValue(Utils.fmt((double)info.get((i*2)-1+j)));
+					}
+//					cell.setCellValue(info.get((i*2)-1+j).toString());
 					XSSFSheet xsheet = (XSSFSheet)sheet;
 					CellReference cellR = new CellReference(cell);
 					xsheet.addIgnoredErrors(cellR, IgnoredErrorType.NUMBER_STORED_AS_TEXT);
@@ -450,6 +463,16 @@ public class ExcelWriter extends ExcelBase{
 				putRowIdx++;
 			}
 		}
+	}
+	private void advancedLayout(Sheet sheet, int shift) {
+		// refer to CNCLocation for more information
+		
+		// for material count
+		Row row = sheet.getRow(11+shift);
+		Cell cell = row.getCell(7);
+		cell.setCellStyle(redStyle);
+		cell = row.getCell(9);
+		cell.setCellStyle(redStyle);
 	}
 	private ArrayList<ConnectionInfo> getCNCConn(ArrayList<CompSummarization> compSumList){
 		ArrayList<ConnectionInfo> CNCConn = new ArrayList<ConnectionInfo>();
