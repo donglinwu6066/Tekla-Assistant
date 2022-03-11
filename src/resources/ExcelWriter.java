@@ -178,7 +178,7 @@ public class ExcelWriter extends ExcelBase{
 				for(Object obj : info) {
 					cell = row.createCell(cellCnt);
 					// odd column is red
-					if(cellCnt%2 == 0 && cellCnt>2) {
+					if(cellCnt%2 == 0 && cellCnt>=2) {
 						cell.setCellStyle(redStyle);
 					}
 					if(obj.getClass() == String.class)
