@@ -96,7 +96,7 @@ public class DataReader {
 				if(item.getSpec().equals("null")) {
 					item.setSpecification(specification);
 				}
-				//tempList.add(item);
+				tempList.add(item);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
