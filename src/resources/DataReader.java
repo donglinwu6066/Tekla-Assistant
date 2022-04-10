@@ -56,47 +56,48 @@ public class DataReader {
 		ArrayList<File> fileArr = getAllFileInFolder(folder);
 		ArrayList<SpecSegmentation> specSegmentationList = new ArrayList<SpecSegmentation>();
 		
-		String specification = "dummy";
-		boolean startFlag = false;
-		// this will be delete later
-		SpecSegmentation item = new SpecSegmentation();
+		String specification = "";
 		System.out.println("Reading sym(讀取.sym)");
+		
 		for(final File f : fileArr) {
-			//System.out.println(f.toString());
 			ArrayList<SpecSegmentation> tempList = new ArrayList<SpecSegmentation>();
 			try {
+				
 				BufferedReader br = new BufferedReader(new FileReader(f));
 				String line = "";
-				while ((line = br.readLine()) != null) {
+				// get specification
+				while((line = br.readLine())!= null) {
+					if(line.charAt(0) == '(') {
+						String []tokens = line.split(" ");
+						specification = hashToSpec.get(tokens[0].split("M")[0].substring(1));
+						br = new BufferedReader(new FileReader(f));
+						break;
+					}
+				}
+				
+				SpecSegmentation item = null;
+				while((line = br.readLine()) != null) {
 					String []tokens = line.split(" ");
-					//System.out.println("line[0] = " +tokens[0]);
-					if(tokens[0].equals("Stock")) {
-						item.setLength(Float.parseFloat(tokens[4].substring(0, tokens[4].length() - 1))); 
+					if(tokens[0].equals("Encl") && item != null) {
+						tempList.add(item); 
+						item = null;
+					}
+					else if(tokens[0].equals("Stock")) {
+						item = new SpecSegmentation();
+						item.setSpecification(specification);
+						item.setLength(Float.parseFloat(tokens[4].substring(0, tokens[4].length() - 1)));
 						item.setCount(Integer.parseInt(tokens[6]));
 					}
 					else if(tokens[0].charAt(0) == '(' ) {
-						specification = hashToSpec.get(tokens[0].split("M")[0].substring(1));
-						
 						String componentStr = tokens[0].split("-")[0].substring(1);
-						item.addComponent(
-								new Pair<String, Float>(componentStr, Float.valueOf(hashToLength.get(componentStr))));
-						
-					}
-					else if(tokens[0].equals("Encl")) {
-						if(startFlag) {
-							item.setSpecification(specification);
-							tempList.add(item); 
-							item = new SpecSegmentation();
-						}
-						startFlag = true;
+						item.addComponent(new Pair<String, Float>(componentStr, Float.valueOf(hashToLength.get(componentStr))));
 					}
 				}
 				br.close();
-				// add last element
-				if(item.getSpec().equals("null")) {
-					item.setSpecification(specification);
+				if(item != null) {
+					tempList.add(item);
+					item = null;
 				}
-				tempList.add(item);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -104,7 +105,7 @@ public class DataReader {
 			specSegmentationList.addAll(tempList);
 		}
 		
-
+		
 		return specSegmentationList;
 	}
 	

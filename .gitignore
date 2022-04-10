@@ -16,3 +16,4 @@ data.dat
 
 # .xlsx
 *.xlsx
+/.apt_generated/

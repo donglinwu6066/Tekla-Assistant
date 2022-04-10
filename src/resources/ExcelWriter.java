@@ -118,13 +118,16 @@ public class ExcelWriter extends ExcelBase{
 	}
 	// for prediction sheet
 	public void writeSYM(ArrayList<SpecSegmentation> sym) {
-
+		
 		Sheet sheet;
 		if(isSheetExist(variables.PREDICTION)) {
 			System.out.println("Remove old content from sheet " + variables.PREDICTION + "(移除舊的"+variables.PREDICTION+"頁面)");
 			removeSheetByName(variables.PREDICTION);
 		}
 		System.out.println("Create new sheet " + variables.PREDICTION+ "(創造新的"+variables.PREDICTION+"頁面)");
+//		for(SpecSegmentation item : sym) {
+//			System.out.println(item);
+//		}
 		sheet = wb.createSheet(variables.PREDICTION);
 		// add new COMPONENTS_SPECIFICATION here
 		Row row = null;
