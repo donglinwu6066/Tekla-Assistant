@@ -25,10 +25,15 @@ public class ExcelReader extends ExcelBase{
 		rows.next();
 
 		LinkedHashMap <SpecSegmentation, Integer> linkedHashMap = new LinkedHashMap <SpecSegmentation, Integer>();
+		boolean rowContinuer = false;
 		while (rows.hasNext()) {
 			ArrayList<String> item = new ArrayList<String>();
 			for(Cell cell: rows.next()) {
-				if(cell.getCellType() == CellType.STRING) {
+				if(cell.getCellType() == CellType.BLANK && cell.getColumnIndex() < 4) {
+					rowContinuer = true;
+					break;
+				}
+				else if(cell.getCellType() == CellType.STRING) {
 					item.add(cell.getStringCellValue());
 				}
 				else if(cell.getCellType() == CellType.NUMERIC) {
@@ -40,6 +45,10 @@ public class ExcelReader extends ExcelBase{
 					
 				}
 			}
+			if(rowContinuer) {
+				rowContinuer = false;
+				continue;
+			}
 			SpecSegmentation specSeg = new SpecSegmentation();
 			// set Specification
 			specSeg.setSpecification(item.get(0));
@@ -50,10 +59,15 @@ public class ExcelReader extends ExcelBase{
 			specSeg.setLength(Float.parseFloat(item.get(0)));
 			item.remove(0);
 			// remove remaining
-			// item.remove(item.size()-1);
+//			System.out.println("remaining = " + item.get(item.size()-1));
+//			item.remove(item.size()-1);
 			// detect prediction format
 			SpecSegmentation.listFormat dataFormat = SpecSegmentation.listFormat.GENERAL;
 			if(item.size()>2 && !item.get(2).contains("M")) {
+				System.out.println(item.size());
+				for(String str : item)
+					System.out.print(str+ " ");
+				System.out.print("\n");
 				dataFormat = SpecSegmentation.listFormat.COMPACTED;
 			}
 			// add component in pair
@@ -99,7 +113,20 @@ public class ExcelReader extends ExcelBase{
 		while (rows.hasNext()) {	
 			row = rows.next();
 			cell = row.getCell(1);
-			length = Float.parseFloat(cell.getStringCellValue());
+
+			if(cell == null || cell.getCellType() == CellType.BLANK) {
+				continue;
+			}
+			else if(cell.getCellType() == CellType.STRING) {
+				length = Float.parseFloat(cell.getStringCellValue());
+			}
+			else if(cell.getCellType() == CellType.NUMERIC) {
+				length = (float)cell.getNumericCellValue();
+			}
+			else {
+				System.out.println("Wrong prdiction length format");
+			}
+			
 			cell = row.getCell(2);
 			material = cell.getStringCellValue().split("M")[0];
 			

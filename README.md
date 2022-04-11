@@ -8,3 +8,4 @@
 * 2.3: fix remaing and connection reference  problem in CNCTable, add highlight
 * 2.4: missed red font in prediction third row, missed last item from prediction.
 * 2.5: fix DataReader.sym 
+* 2.6: support empty row and fix bugs
