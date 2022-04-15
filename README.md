@@ -9,3 +9,4 @@
 * 2.4: missed red font in prediction third row, missed last item from prediction.
 * 2.5: fix DataReader.sym 
 * 2.6: support empty row and fix bugs
+* 2.7: new feature, update ncl

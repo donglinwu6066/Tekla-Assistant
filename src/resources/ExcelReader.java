@@ -11,41 +11,39 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
-public class ExcelReader extends ExcelBase{
+public class ExcelReader extends ExcelBase {
 
-	public ExcelReader(String fileName){
+	public ExcelReader(String fileName) {
 		super(fileName);
 	}
-	
-	public LinkedHashMap <SpecSegmentation, Integer> readPrediction() {
+
+	public LinkedHashMap<SpecSegmentation, Integer> readPrediction() {
 		Sheet sheet = wb.getSheet(variables.PREDICTION);
 		Iterator<Row> rows = sheet.rowIterator();
-		
+
 		// omit first menu row
 		rows.next();
 
-		LinkedHashMap <SpecSegmentation, Integer> linkedHashMap = new LinkedHashMap <SpecSegmentation, Integer>();
+		LinkedHashMap<SpecSegmentation, Integer> linkedHashMap = new LinkedHashMap<SpecSegmentation, Integer>();
 		boolean rowContinuer = false;
 		while (rows.hasNext()) {
 			ArrayList<String> item = new ArrayList<String>();
-			for(Cell cell: rows.next()) {
-				if(cell.getCellType() == CellType.BLANK && cell.getColumnIndex() < 4) {
+			for (Cell cell : rows.next()) {
+				if (cell.getCellType() == CellType.BLANK && cell.getColumnIndex() < 4) {
 					rowContinuer = true;
 					break;
-				}
-				else if(cell.getCellType() == CellType.STRING) {
+				} else if (cell.getCellType() == CellType.STRING) {
 					item.add(cell.getStringCellValue());
-				}
-				else if(cell.getCellType() == CellType.NUMERIC) {
+				} else if (cell.getCellType() == CellType.NUMERIC) {
 					String tmp = String.valueOf(cell.getNumericCellValue());
-					if(Utils.isInteger(tmp)) {
+					if (Utils.isInteger(tmp)) {
 						tmp = tmp.substring(0, tmp.indexOf('.'));
 					}
-						item.add(tmp);
-					
+					item.add(tmp);
+
 				}
 			}
-			if(rowContinuer) {
+			if (rowContinuer) {
 				rowContinuer = false;
 				continue;
 			}
@@ -59,26 +57,22 @@ public class ExcelReader extends ExcelBase{
 			specSeg.setLength(Float.parseFloat(item.get(0)));
 			item.remove(0);
 			// remove remaining
-//			System.out.println("remaining = " + item.get(item.size()-1));
-//			item.remove(item.size()-1);
+			// System.out.println("remaining = " + item.get(item.size()-1));
+			// item.remove(item.size()-1);
 			// detect prediction format
 			SpecSegmentation.listFormat dataFormat = SpecSegmentation.listFormat.GENERAL;
-			if(item.size()>2 && !item.get(2).contains("M")) {
-				System.out.println(item.size());
-				for(String str : item)
-					System.out.print(str+ " ");
-				System.out.print("\n");
+			if (item.size() > 2 && !item.get(2).contains("M")) {
 				dataFormat = SpecSegmentation.listFormat.COMPACTED;
 			}
 			// add component in pair
-			while(!item.isEmpty()) {
-				if(dataFormat == SpecSegmentation.listFormat.GENERAL) {
+			while (!item.isEmpty()) {
+				if (dataFormat == SpecSegmentation.listFormat.GENERAL) {
 					specSeg.addComponent(new Pair<String, Float>(item.get(0), Float.parseFloat(item.get(1))));
 					item.remove(0);
 					item.remove(0);
-				} else{
+				} else {
 					int count = Integer.parseInt(item.get(2));
-					for(int i=0 ; i<count ; i++) {
+					for (int i = 0; i < count; i++) {
 						String component = item.get(0);
 						float length = Float.parseFloat(item.get(1));
 						specSeg.addComponent(new Pair<String, Float>(component, length));
@@ -88,16 +82,17 @@ public class ExcelReader extends ExcelBase{
 					item.remove(0);
 				}
 			}
-			
-			if(!linkedHashMap.containsKey(specSeg)) {
+
+			if (!linkedHashMap.containsKey(specSeg)) {
 				linkedHashMap.put(specSeg, 1);
 			} else {
-				int value = linkedHashMap.get(specSeg) +1;
+				int value = linkedHashMap.get(specSeg) + 1;
 				linkedHashMap.put(specSeg, value);
 			}
 		}
 		return linkedHashMap;
 	}
+
 	public ArrayList<CompSummarization> getSummarization() {
 		ArrayList<CompSummarization> sumList = new ArrayList<CompSummarization>();
 		Sheet sheet = wb.getSheet(variables.PREDICTION);
@@ -106,36 +101,33 @@ public class ExcelReader extends ExcelBase{
 		Cell cell;
 		// omit first menu row
 		rows.next();
-		
+
 		String material = "";
 		float length = 0;
-		
-		while (rows.hasNext()) {	
+
+		while (rows.hasNext()) {
 			row = rows.next();
 			cell = row.getCell(1);
 
-			if(cell == null || cell.getCellType() == CellType.BLANK) {
+			if (cell == null || cell.getCellType() == CellType.BLANK) {
 				continue;
-			}
-			else if(cell.getCellType() == CellType.STRING) {
+			} else if (cell.getCellType() == CellType.STRING) {
 				length = Float.parseFloat(cell.getStringCellValue());
-			}
-			else if(cell.getCellType() == CellType.NUMERIC) {
-				length = (float)cell.getNumericCellValue();
-			}
-			else {
+			} else if (cell.getCellType() == CellType.NUMERIC) {
+				length = (float) cell.getNumericCellValue();
+			} else {
 				System.out.println("Wrong prdiction length format");
 			}
-			
+
 			cell = row.getCell(2);
 			material = cell.getStringCellValue().split("M")[0];
-			
+
 			CompSummarization compSum = new CompSummarization(material, length);
-			if(!sumList.contains(compSum)) {
+			if (!sumList.contains(compSum)) {
 				sumList.add(compSum);
-			}
-			else {
-				// since equals is not include cnt, therefore, we can treat different cnt but the same 
+			} else {
+				// since equals is not include cnt, therefore, we can treat different cnt but
+				// the same
 				// material & length equal.
 				int idx = sumList.indexOf(compSum);
 				compSum = sumList.get(idx);
@@ -145,17 +137,17 @@ public class ExcelReader extends ExcelBase{
 		}
 		return sumList;
 	}
+
 	public HashMap<String, ArrayList<ConnectionInfo>> readConnection() {
 		HashMap<String, ConnectionInfo> typeHash = readConnectionType();
 		HashMap<String, ArrayList<String>> codeHash = readConnectionCode();
-		HashMap<String, ArrayList<ConnectionInfo>> CNCConnection 
-			= new HashMap<String, ArrayList<ConnectionInfo>>();
-		
+		HashMap<String, ArrayList<ConnectionInfo>> CNCConnection = new HashMap<String, ArrayList<ConnectionInfo>>();
+
 		for (Entry<String, ArrayList<String>> entry : codeHash.entrySet()) {
-//			System.out.println(entry.getKey() + ":" + entry.getValue().toString());
+			// System.out.println(entry.getKey() + ":" + entry.getValue().toString());
 			ArrayList<ConnectionInfo> info = new ArrayList<ConnectionInfo>();
-			for(String code : entry.getValue()) {
-				if(!info.contains(typeHash.get(code))) {
+			for (String code : entry.getValue()) {
+				if (!info.contains(typeHash.get(code))) {
 					info.add(typeHash.get(code));
 				}
 			}
@@ -163,19 +155,19 @@ public class ExcelReader extends ExcelBase{
 		}
 		return CNCConnection;
 	}
+
 	private HashMap<String, ConnectionInfo> readConnectionType() {
-		HashMap<String, ConnectionInfo> typeHash 
-			= new HashMap<String, ConnectionInfo>();
-		
+		HashMap<String, ConnectionInfo> typeHash = new HashMap<String, ConnectionInfo>();
+
 		Sheet sheet = wb.getSheet(variables.CONNECTION_TYPE);
-		Iterator<Row> rows = sheet.rowIterator();		
+		Iterator<Row> rows = sheet.rowIterator();
 		rows = sheet.rowIterator();
 		// omit first menu row
 		Iterator<Cell> menuColumns = rows.next().cellIterator();
 		// dump first element
 		menuColumns.next();
 		ArrayList<String> wReference = new ArrayList<String>();
-		while(menuColumns.hasNext()) {
+		while (menuColumns.hasNext()) {
 			wReference.add(menuColumns.next().getStringCellValue());
 		}
 
@@ -185,56 +177,57 @@ public class ExcelReader extends ExcelBase{
 			String type = columns.next().getStringCellValue();
 			String type_domninate = type.split("-")[0];
 			ConnectionInfo connectionInfo = new ConnectionInfo(type);
-			if(type_domninate.equals("W")) {
+			if (type_domninate.equals("W")) {
 				int i = 0;
-				while(columns.hasNext()) {
+				while (columns.hasNext()) {
 					Cell cell = columns.next();
-					if(cell.getCellType() == CellType.STRING) {
-						connectionInfo.add(new Pair<Object, Object>( wReference.get(i), 
+					if (cell.getCellType() == CellType.STRING) {
+						connectionInfo.add(new Pair<Object, Object>(wReference.get(i),
 								cell.getStringCellValue()));
-					} else if (cell.getCellType() == CellType.NUMERIC){
-						connectionInfo.add(new Pair<Object, Object>(wReference.get(i), 
+					} else if (cell.getCellType() == CellType.NUMERIC) {
+						connectionInfo.add(new Pair<Object, Object>(wReference.get(i),
 								cell.getNumericCellValue()));
 					}
 					i++;
 				}
-			}
-			else {
-				if(rows.hasNext()) {
+			} else {
+				if (rows.hasNext()) {
 					Row nextRow = rows.next();
 					Iterator<Cell> nextColumn = nextRow.cellIterator();
 					// dump first blank
 					nextColumn.next();
 					boolean lastNull = false;
-					while(columns.hasNext() && nextColumn.hasNext()) {
+					while (columns.hasNext() && nextColumn.hasNext()) {
 						Cell cell = columns.next();
 						Cell nextCell = nextColumn.next();
 						Object first = new Object();
 						Object second = new Object();
-						switch(cell.getCellType()) {
-						case STRING: 
-							first = cell.getStringCellValue();
-							break;
-						case NUMERIC:
-							first = cell.getNumericCellValue();
-							break;
-						default:
-							lastNull = true;
+						switch (cell.getCellType()) {
+							case STRING:
+								first = cell.getStringCellValue();
+								break;
+							case NUMERIC:
+								first = cell.getNumericCellValue();
+								break;
+							default:
+								lastNull = true;
+								break;
+						}
+						switch (nextCell.getCellType()) {
+							case STRING:
+								second = nextCell.getStringCellValue();
+								break;
+							case NUMERIC:
+								second = nextCell.getNumericCellValue();
+								break;
+							default:
+								lastNull = true;
+								break;
+						}
+						if (lastNull) {
 							break;
 						}
-						switch(nextCell.getCellType()) {
-						case STRING: 
-							second = nextCell.getStringCellValue();
-							break;
-						case NUMERIC:
-							second = nextCell.getNumericCellValue();
-							break;
-						default:
-							lastNull = true;
-							break;
-						}
-						if(lastNull) {break;}
-						connectionInfo.add(new Pair<Object, Object>( first, second));
+						connectionInfo.add(new Pair<Object, Object>(first, second));
 					}
 				}
 			}
@@ -243,41 +236,43 @@ public class ExcelReader extends ExcelBase{
 		}
 		return typeHash;
 	}
+
 	private HashMap<String, ArrayList<String>> readConnectionCode() {
-			HashMap<String, ArrayList<String>> codeHash = new HashMap<String, ArrayList<String>>();
-			
+		HashMap<String, ArrayList<String>> codeHash = new HashMap<String, ArrayList<String>>();
+
 		Sheet sheet = wb.getSheet(variables.CONNECTION_CODE);
 		Iterator<Row> rows = sheet.rowIterator();
 		// omit first menu row
 		rows.next();
-		
-		while (rows.hasNext()) {	
+
+		while (rows.hasNext()) {
 			Iterator<Cell> columns = rows.next().cellIterator();
-			
+
 			ArrayList<String> codeList = new ArrayList<String>();
 			String component = columns.next().getStringCellValue();
-			while(columns.hasNext()) {
+			while (columns.hasNext()) {
 				Cell cell = columns.next();
-				if(!cell.getStringCellValue().equals(""))
+				if (!cell.getStringCellValue().equals(""))
 					codeList.add(cell.getStringCellValue());
 			}
 			// remove last null element
 			codeHash.put(component, codeList);
 		}
-		
+
 		return codeHash;
 	}
+
 	public HashMap<String, String> componentToTexture() {
 		HashMap<String, String> hash = new HashMap<String, String>();
 		Sheet sheet = wb.getSheet(variables.COMPONENTS_SPECIFICATION);
 		Iterator<Row> rows = sheet.rowIterator();
-		
+
 		Row row;
 		Cell cell;
 		String component = "";
 		String texture = "";
 		rows.next();
-		while (rows.hasNext()) {	
+		while (rows.hasNext()) {
 			row = rows.next();
 			cell = row.getCell(0);
 			component = cell.getStringCellValue();

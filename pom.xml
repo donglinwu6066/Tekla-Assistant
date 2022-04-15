@@ -41,7 +41,6 @@
 					</goal>
 				</goals>
 			</plugin>
-
 			<!-- override default jar -->
 			<plugin>
 				<groupId>
@@ -70,81 +69,45 @@
 					maven-assembly-plugin
 				</artifactId>
 				<executions>
-				<!-- first executable jar -->
-				<!-- 
+					<!-- executable jar -->
+					<!--
 					<execution>
-						<id>
-							data-gen
-						</id>
-						<configuration>
-							<archive>
-								<manifest>
-									<mainClass>
-										DatabaseGenerator
-									</mainClass>
-								</manifest>
-							</archive>
-							<descriptorRefs>
-								<descriptorRef>
-									jar-with-dependencies
-								</descriptorRef>
-							</descriptorRefs>
-							<appendAssemblyId>
-								false
-							</appendAssemblyId>
-							<finalName>
-								DatabaseGenerator
-							</finalName>
-						</configuration>
-						<phase>
-							package
-						</phase>
-						<goals>
-							<goal>
-								single
-							</goal>
-						</goals>
-					</execution>-->
-					<!-- second executable jar -->
-					<!-- 
-					<execution>
-						
-						<id>
-							key-gen
-						</id>
-						<configuration>
-							<archive>
-								<manifest>
-									<mainClass>
-										KeyGenerator
-									</mainClass>
-								</manifest>
-							</archive>
-							<descriptorRefs>
-								<descriptorRef>
-									jar-with-dependencies
-								</descriptorRef>
-							</descriptorRefs>
-							<appendAssemblyId>
-								false
-							</appendAssemblyId>
-							<finalName>
-								KeyGenerator-2.0
-							</finalName>
-						</configuration>
-						<phase>
-							package
-						</phase>
-						<goals>
-							<goal>
-								single
-							</goal>
-						</goals>
+					
+					<id>
+					key-gen
+					</id>
+					<configuration>
+					<archive>
+					<manifest>
+					<mainClass>
+					KeyGenerator
+					</mainClass>
+					</manifest>
+					</archive>
+					<descriptorRefs>
+					<descriptorRef>
+					jar-with-dependencies
+					</descriptorRef>
+					</descriptorRefs>
+					<appendAssemblyId>
+					false
+					</appendAssemblyId>
+					<finalName>
+					KeyGenerator-2.0
+					</finalName>
+					</configuration>
+					<phase>
+					package
+					</phase>
+					<goals>
+					<goal>
+					single
+					</goal>
+					</goals>
 					</execution>
 					-->
 					<execution>
-						
-						<!-- third executable jar -->
+						<!-- executable jar -->
 						<id>
 							CNC-gen
 						</id>
@@ -155,6 +118,11 @@
 										CNCGenerator
 									</mainClass>
 								</manifest>
+								<manifestEntries>
+									<Multi-Release>
+										true
+									</Multi-Release>
+								</manifestEntries>
 							</archive>
 							<descriptorRefs>
 								<descriptorRef>
@@ -165,7 +133,7 @@
 								false
 							</appendAssemblyId>
 							<finalName>
-								CNCGenerator-2.6
+								CNCGenerator-2.7
 							</finalName>
 						</configuration>
 						<phase>
@@ -179,7 +147,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			
 		</plugins>
 	</build>
 	<dependencies>

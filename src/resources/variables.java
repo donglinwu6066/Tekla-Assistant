@@ -17,6 +17,7 @@ public final class variables {
     public static String CNC_TABLE_NAME;
     public static boolean REQUIRED_PASSWORD;
     public static boolean OVERRIDE_DATABASE_PREDICTION;
+    public static boolean UPDATE_DATABASE_PREDICTION;
     public static String KEY_FILE_NAME;
     public static String PROJECT_ROOT;
     public static String NCL_ROOT;
@@ -58,7 +59,7 @@ public final class variables {
     public static String CONNECTION_CODE;
     static {
         // program define variables
-        PASSWORD = "atp29563t9906";
+        PASSWORD = "password";
         REQUIRED_PASSWORD = true;
 
         // JSON parser object to parse read file
@@ -72,6 +73,7 @@ public final class variables {
             PROJECT_NAME = (String) variablesObject.get("PROJECT_NAME");
             KEY_FILE_NAME = (String) variablesObject.get("KEY_FILE_NAME");
             OVERRIDE_DATABASE_PREDICTION = (boolean) variablesObject.get("OVERRIDE_DATABASE_PREDICTION");
+            UPDATE_DATABASE_PREDICTION = (boolean) variablesObject.get("UPDATE_DATABASE_PREDICTION");
             PROJECT_ROOT = (String) variablesObject.get("PROJECT_ROOT");
             NCL_ROOT = (String) variablesObject.get("NCL_ROOT");
             SYM_ROOT = (String) variablesObject.get("SYM_ROOT");

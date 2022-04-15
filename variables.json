@@ -2,6 +2,7 @@
     "COMPANY_NAME": "Company_Name",
     "PROJECT_NAME": "全家台中盟立自動",
     "OVERRIDE_DATABASE_PREDICTION": false,
+    "UPDATE_DATABASE_PREDICTION": true,
     "KEY_FILE_NAME": "data.dat",
     "CNC_TABLE_NAME": "CNC 鑽孔程式表",
     "PROJECT_ROOT": "prj",

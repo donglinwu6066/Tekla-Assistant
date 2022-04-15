@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 
 import resources.SpecSegmentation.listFormat;
@@ -20,6 +21,7 @@ import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IgnoredErrorType;
@@ -28,7 +30,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 
-public class ExcelWriter extends ExcelBase{
+public class ExcelWriter extends ExcelBase {
 	private CNCTable cncTable;
 	private HashMap<String, ArrayList<ConnectionInfo>> connectionInfo;
 	private CellStyle style;
@@ -38,20 +40,20 @@ public class ExcelWriter extends ExcelBase{
 	private final int WIDER_COLUMN_WIDTH = 5000;
 	private final int COLUMN_WIDTH = 2500;
 	private final int SHIFT = CellOutput.MAX_ROW;
-	
-	public ExcelWriter(String fileName){
+
+	public ExcelWriter(String fileName) {
 		super(fileName);
 		this.cncTable = new CNCTable();
 		this.redFont = wb.createFont();
 		this.redFont.setColor(HSSFColor.HSSFColorPredefined.RED.getIndex());
-		
+
 		this.style = wb.createCellStyle();
 		this.style.setAlignment(HorizontalAlignment.CENTER);
-		
+
 		this.redStyle = wb.createCellStyle();
 		this.redStyle.setFont(redFont);
 		this.redStyle.setAlignment(HorizontalAlignment.CENTER);
-		
+
 		this.borderStyle = wb.createCellStyle();
 		this.borderStyle.setBorderBottom(BorderStyle.THIN);
 		this.borderStyle.setBorderTop(BorderStyle.THIN);
@@ -59,56 +61,56 @@ public class ExcelWriter extends ExcelBase{
 		this.borderStyle.setBorderLeft(BorderStyle.THIN);
 		this.borderStyle.setAlignment(HorizontalAlignment.CENTER);
 	}
-	
+
 	// for component sheet
 	public void writeNCL(ArrayList<Component> ncl) {
 
 		Sheet sheet;
-		if(isSheetExist(variables.COMPONENTS_SPECIFICATION)) {
-			System.out.println("Remove old content from sheet " + 
-				variables.COMPONENTS_SPECIFICATION+ "(移除舊的"+variables.COMPONENTS_SPECIFICATION+"頁面)");
+		if (isSheetExist(variables.COMPONENTS_SPECIFICATION)) {
+			System.out.println("Remove old content from sheet " + variables.COMPONENTS_SPECIFICATION + "(移除舊的"
+					+ variables.COMPONENTS_SPECIFICATION + "頁面)");
 			removeSheetByName(variables.COMPONENTS_SPECIFICATION);
 		}
-		System.out.println("Create new sheet " + variables.COMPONENTS_SPECIFICATION + 
-				"(創造新的"+variables.COMPONENTS_SPECIFICATION+"頁面)");
+		System.out.println("Create new sheet " + variables.COMPONENTS_SPECIFICATION + "(創造新的"
+				+ variables.COMPONENTS_SPECIFICATION + "頁面)");
 		sheet = wb.createSheet(variables.COMPONENTS_SPECIFICATION);
+
 		// add new COMPONENTS_SPECIFICATION here
 		Row row = null;
 		Cell cell = null;
 		int rowCnt = 0;
 		int cellCnt = 0;
-		String COMPONENTS_SPECIFICATION_MENU[] = {variables.COMPONENTS_SPECIFICATION, 
-				variables.MATERIAL, variables.LENGTH, 
-				variables.COUNT, variables.SPECIFICATION, variables.TEXTURE};
-		
-		for (int i =0 ; i<  COMPONENTS_SPECIFICATION_MENU.length ; i++) {
-		    sheet.setColumnWidth(i, COLUMN_WIDTH);;
+		String COMPONENTS_SPECIFICATION_MENU[] = { variables.COMPONENTS_SPECIFICATION, variables.MATERIAL,
+				variables.LENGTH, variables.COUNT, variables.SPECIFICATION, variables.TEXTURE };
+
+		for (int i = 0; i < COMPONENTS_SPECIFICATION_MENU.length; i++) {
+			sheet.setColumnWidth(i, COLUMN_WIDTH);
+			;
 		}
-		//spec need more space
-		sheet.setColumnWidth(4 ,WIDER_COLUMN_WIDTH);
+		// spec need more space
+		sheet.setColumnWidth(4, WIDER_COLUMN_WIDTH);
 		// write first menu
 		row = sheet.createRow(rowCnt);
-		for(String str : COMPONENTS_SPECIFICATION_MENU) {
-			cell = row.createCell(cellCnt);	
+		for (String str : COMPONENTS_SPECIFICATION_MENU) {
+			cell = row.createCell(cellCnt);
 			cell.setCellValue(str);
 			cellCnt += 1;
 		}
-		
-		for(Component item : ncl) {
+
+		for (Component item : ncl) {
 			rowCnt++;
 			cellCnt = 0;
 			row = sheet.createRow(rowCnt);
-			XSSFSheet xsheet = (XSSFSheet)sheet;
+			XSSFSheet xsheet = (XSSFSheet) sheet;
 			ArrayList<Object> info = (ArrayList<Object>) item.getInfo();
-			for(Object obj : info) {
+			for (Object obj : info) {
 				cell = row.createCell(cellCnt);
-				if(obj.getClass() == String.class)
+				if (obj.getClass() == String.class)
 					cell.setCellValue(obj.toString());
-				else if(obj.getClass() == Integer.class) {
+				else if (obj.getClass() == Integer.class) {
 					cell.setCellValue(obj.toString());
-				}
-				else if(obj.getClass() == Float.class) {
-					cell.setCellValue(Utils.fmt((float)obj));
+				} else if (obj.getClass() == Float.class) {
+					cell.setCellValue(Utils.fmt((float) obj));
 				}
 				CellReference cellR = new CellReference(cell);
 				xsheet.addIgnoredErrors(cellR, IgnoredErrorType.NUMBER_STORED_AS_TEXT);
@@ -116,18 +118,90 @@ public class ExcelWriter extends ExcelBase{
 			}
 		}
 	}
+
+	public void updateNCL(ArrayList<Component> ncl) {
+		// update ncl in variables.PREDICTION(length)
+		Sheet sheet;
+		System.out.println("Update sheet " + variables.PREDICTION + "(更新" + variables.PREDICTION + "頁面)");
+		sheet = wb.getSheet(variables.PREDICTION);
+
+		int colCnt = 2;
+		int COL_MAX_CNT = SpecSegmentation.MAX_A4_COLUMN;
+
+		XSSFSheet xsheet = (XSSFSheet) sheet;
+//		int lastRowNum = sheet.getLastRowNum();
+		Iterator<Row> rows = sheet.rowIterator();
+//		for(int j=1 ; j<=lastRowNum ; j++) {
+		while(rows.hasNext()) {
+//			Row row = sheet.getRow(j);
+			Row row = rows.next();
+			for (int i = colCnt; i < colCnt + COL_MAX_CNT; i++) {
+				Cell cell = row.getCell(i);
+				if (cell != null && cell.getCellType() == CellType.STRING) {
+					String cellStr = cell.getStringCellValue();
+					if (cellStr.contains("M")) {
+//						System.out.println("(" + row.getRowNum() + ", " + cell.getColumnIndex() + ")");
+//						System.out.println("(" + row.getRowNum() + ", " + (i + 1) + ")");
+						boolean unfound = true;
+						Cell specLenC;
+						if (row.getCell(i + 1) == null) {
+//							System.out.println("null");
+							specLenC = row.createCell(i + 1);
+						} else {
+//							System.out.println("blank");
+							specLenC = row.getCell(i + 1);
+						}
+
+						for (Component component : ncl) {
+							if (component.component.equals(cellStr)) {
+//								System.out.println("set (" + row.getRowNum() + ", " + (i + 1) + ") as "+Utils.fmt((float) component.length));
+								specLenC.setCellValue(Utils.fmt((float) component.length));
+								CellReference cellR = new CellReference(specLenC);
+								xsheet.addIgnoredErrors(cellR, IgnoredErrorType.NUMBER_STORED_AS_TEXT);
+								unfound = false;
+								break;
+							}
+						}
+						if (unfound) {
+							specLenC.setCellValue("9999999");
+							int w_row = row.getRowNum();
+							int w_col = cell.getColumnIndex();
+							System.out.println("detect unspecified ncl data in (" + w_row + ", " + w_col +
+									")(找到未宣告的ncl資料在(" + w_row + ", " + w_col + "))");
+							System.out.println(cellStr);
+						}
+					}
+				}
+			}
+		}
+		XSSFFormulaEvaluator.evaluateAllFormulaCells(wb);
+		try {
+			FileOutputStream fileOut = new FileOutputStream(fileName);
+			wb.write(fileOut);
+			fileOut.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		// wb.setForceFormulaRecalculation(true);
+	}
+
 	// for prediction sheet
 	public void writeSYM(ArrayList<SpecSegmentation> sym) {
-		
+
 		Sheet sheet;
-		if(isSheetExist(variables.PREDICTION)) {
-			System.out.println("Remove old content from sheet " + variables.PREDICTION + "(移除舊的"+variables.PREDICTION+"頁面)");
+		if (isSheetExist(variables.PREDICTION)) {
+			System.out.println(
+					"Remove old content from sheet " + variables.PREDICTION + "(移除舊的" + variables.PREDICTION + "頁面)");
 			removeSheetByName(variables.PREDICTION);
 		}
-		System.out.println("Create new sheet " + variables.PREDICTION+ "(創造新的"+variables.PREDICTION+"頁面)");
-//		for(SpecSegmentation item : sym) {
-//			System.out.println(item);
-//		}
+		System.out.println("Create new sheet " + variables.PREDICTION + "(創造新的" + variables.PREDICTION + "頁面)");
+		// for(SpecSegmentation item : sym) {
+		// System.out.println(item);
+		// }
 		sheet = wb.createSheet(variables.PREDICTION);
 		// add new COMPONENTS_SPECIFICATION here
 		Row row = null;
@@ -135,62 +209,60 @@ public class ExcelWriter extends ExcelBase{
 		int rowCnt = 0;
 		int cellCnt = 0;
 		int MIN_COLUMN = SpecSegmentation.MAX_A4_COLUMN;
-		String COMPONENTS_SPECIFICATION_MENU[] = {variables.SPECIFICATION_LENGTH, variables.LENGTH,
-													variables.COMPONENTS, variables.LENGTH,
-													variables.REMAINING, variables.WEIGHT
-													};
-		
+		String COMPONENTS_SPECIFICATION_MENU[] = { variables.SPECIFICATION_LENGTH, variables.LENGTH,
+				variables.COMPONENTS, variables.LENGTH, variables.REMAINING, variables.WEIGHT };
+
 		// 4 is for other items
-		for (int i =0 ; i<  MIN_COLUMN + 5 ; i++) {
-		    sheet.setColumnWidth(i, COLUMN_WIDTH);;
+		for (int i = 0; i < MIN_COLUMN + 5; i++) {
+			sheet.setColumnWidth(i, COLUMN_WIDTH);
+			;
 		}
-		//spec need more space
-		sheet.setColumnWidth(0 ,WIDER_COLUMN_WIDTH);
+		// spec need more space
+		sheet.setColumnWidth(0, WIDER_COLUMN_WIDTH);
 
 		// write first menu
 		row = sheet.createRow(rowCnt);
-		for(int i=0 ; i<2 ; i++) {
-			cell = row.createCell(cellCnt);	
+		for (int i = 0; i < 2; i++) {
+			cell = row.createCell(cellCnt);
 			cell.setCellValue(COMPONENTS_SPECIFICATION_MENU[i]);
 			cellCnt += 1;
 		}
 		// components
-		for(int i=0 ; i<MIN_COLUMN ; i++) {
-			cell = row.createCell(cellCnt);	
-			cell.setCellValue(COMPONENTS_SPECIFICATION_MENU[2+i%2]);
+		for (int i = 0; i < MIN_COLUMN; i++) {
+			cell = row.createCell(cellCnt);
+			cell.setCellValue(COMPONENTS_SPECIFICATION_MENU[2 + i % 2]);
 			cellCnt += 1;
 		}
-		for(int i=0 ; i<2 ; i++) {
-			cell = row.createCell(cellCnt);	
-			cell.setCellValue(COMPONENTS_SPECIFICATION_MENU[4+i]);
+		for (int i = 0; i < 2; i++) {
+			cell = row.createCell(cellCnt);
+			cell.setCellValue(COMPONENTS_SPECIFICATION_MENU[4 + i]);
 			cellCnt += 1;
 		}
-		
+
 		redStyle = wb.createCellStyle();
 		redStyle.setFont(this.redFont);
 		// write content
-		XSSFSheet xsheet = (XSSFSheet)sheet;
-		for(SpecSegmentation item : sym) {
+		XSSFSheet xsheet = (XSSFSheet) sheet;
+		for (SpecSegmentation item : sym) {
 			ArrayList<Object> info = (ArrayList<Object>) item.getInfo();
 			SpecSegmentation.listFormat format = item.getListformat();
-			//test new layout
-			for(int i=0 ; i<item.count ; i++) {
+			// test new layout
+			for (int i = 0; i < item.count; i++) {
 				rowCnt++;
 				row = sheet.createRow(rowCnt);
 				cellCnt = 0;
-				for(Object obj : info) {
+				for (Object obj : info) {
 					cell = row.createCell(cellCnt);
 					// odd column is red
-					if(cellCnt%2 == 0 && cellCnt>=2) {
+					if (cellCnt % 2 == 0 && cellCnt >= 2) {
 						cell.setCellStyle(redStyle);
 					}
-					if(obj.getClass() == String.class)
+					if (obj.getClass() == String.class)
 						cell.setCellValue(obj.toString());
-					else if(obj.getClass() == Integer.class) {
+					else if (obj.getClass() == Integer.class) {
 						cell.setCellValue(obj.toString());
-					}
-					else if(obj.getClass() == Float.class) {
-						cell.setCellValue(Utils.fmt((float)obj));
+					} else if (obj.getClass() == Float.class) {
+						cell.setCellValue(Utils.fmt((float) obj));
 					}
 					CellReference cellR = new CellReference(cell);
 					xsheet.addIgnoredErrors(cellR, IgnoredErrorType.NUMBER_STORED_AS_TEXT);
@@ -198,72 +270,73 @@ public class ExcelWriter extends ExcelBase{
 				}
 				// remaining formula
 				String strGeneralFormula = "";
-				if(format == listFormat.GENERAL)
-					strGeneralFormula = "B"+(rowCnt+1)+"-D"+(rowCnt+1)+"-F"+(rowCnt+1)+
-										"-H"+(rowCnt+1)+"-J"+(rowCnt+1)+"-L"+(rowCnt+1)+
-										"-N"+(rowCnt+1)+"-P"+(rowCnt+1)+"-R"+(rowCnt+1)+
-										"-T"+(rowCnt+1)+"-V"+(rowCnt+1)+"-X"+(rowCnt+1)+
-										"-Z"+(rowCnt+1)+"-AB"+(rowCnt+1)+"-AD"+(rowCnt+1)+"-AF"+(rowCnt+1);
+				if (format == listFormat.GENERAL)
+					strGeneralFormula = "B" + (rowCnt + 1) + "-D" + (rowCnt + 1) + "-F" + (rowCnt + 1) + "-H"
+							+ (rowCnt + 1) + "-J" + (rowCnt + 1) + "-L" + (rowCnt + 1) + "-N" + (rowCnt + 1) + "-P"
+							+ (rowCnt + 1) + "-R" + (rowCnt + 1) + "-T" + (rowCnt + 1) + "-V" + (rowCnt + 1) + "-X"
+							+ (rowCnt + 1) + "-Z" + (rowCnt + 1) + "-AB" + (rowCnt + 1) + "-AD" + (rowCnt + 1) + "-AF"
+							+ (rowCnt + 1);
 				else {
-					strGeneralFormula = "B"+(rowCnt+1)+"-(D"+(rowCnt+1)+"*+E"+(rowCnt+1) +
-							")-(G"+(rowCnt+1)+"*H"+(rowCnt+1)+")-(J"+(rowCnt+1)+"*K"+(rowCnt+1)+
-							")-(M"+(rowCnt+1)+"*N"+(rowCnt+1)+")-(P"+(rowCnt+1)+"*Q"+(rowCnt+1)+
-							")-(S"+(rowCnt+1)+"*T"+(rowCnt+1)+")-(V"+(rowCnt+1)+"*W"+(rowCnt+1)+
-							")-(Y"+(rowCnt+1)+"*Z"+(rowCnt+1)+")-(AB"+(rowCnt+1)+"*AC"+(rowCnt+1)+
-							")-(AE"+(rowCnt+1)+"*AF"+(rowCnt+1)+")";
+					strGeneralFormula = "B" + (rowCnt + 1) + "-(D" + (rowCnt + 1) + "*+E" + (rowCnt + 1) + ")-(G"
+							+ (rowCnt + 1) + "*H" + (rowCnt + 1) + ")-(J" + (rowCnt + 1) + "*K" + (rowCnt + 1) + ")-(M"
+							+ (rowCnt + 1) + "*N" + (rowCnt + 1) + ")-(P" + (rowCnt + 1) + "*Q" + (rowCnt + 1) + ")-(S"
+							+ (rowCnt + 1) + "*T" + (rowCnt + 1) + ")-(V" + (rowCnt + 1) + "*W" + (rowCnt + 1) + ")-(Y"
+							+ (rowCnt + 1) + "*Z" + (rowCnt + 1) + ")-(AB" + (rowCnt + 1) + "*AC" + (rowCnt + 1)
+							+ ")-(AE" + (rowCnt + 1) + "*AF" + (rowCnt + 1) + ")";
 				}
-				
+
 				// 2 is to locate remaining
 				cell = row.createCell(MIN_COLUMN + 2);
 				cell.setCellFormula(strGeneralFormula);
-//				cell.setCellValue(Utils.fmt((float)item.getRemaining()));
+				// cell.setCellValue(Utils.fmt((float)item.getRemaining()));
 				CellReference cellR = new CellReference(cell);
 				xsheet.addIgnoredErrors(cellR, IgnoredErrorType.NUMBER_STORED_AS_TEXT);
 			}
 		}
-		
-		
+
 	}
+
 	public void writeSum(ArrayList<CompSummarization> sumList) {
 		Sheet sheet;
-		if(isSheetExist(variables.SUMMARIZATION)) {
-			System.out.println("Remove old content from sheet " + variables.SUMMARIZATION + "(移除舊的"+variables.SUMMARIZATION+"頁面)");
+		if (isSheetExist(variables.SUMMARIZATION)) {
+			System.out.println("Remove old content from sheet " + variables.SUMMARIZATION + "(移除舊的"
+					+ variables.SUMMARIZATION + "頁面)");
 			removeSheetByName(variables.SUMMARIZATION);
 		}
-		System.out.println("Create new sheet " + variables.SUMMARIZATION+ "(創造新的"+variables.SUMMARIZATION+"頁面)");
+		System.out.println("Create new sheet " + variables.SUMMARIZATION + "(創造新的" + variables.SUMMARIZATION + "頁面)");
 		sheet = wb.createSheet(variables.SUMMARIZATION);
 		Row row = null;
 		Cell cell = null;
-		String SUMMARIZATION_MENU[] = {variables.MATERIAL, variables.LENGTH, variables.COUNT};
-		
-		for (int i =0 ; i<  SUMMARIZATION_MENU.length ; i++) {
-		    sheet.setColumnWidth(i, COLUMN_WIDTH);;
+		String SUMMARIZATION_MENU[] = { variables.MATERIAL, variables.LENGTH, variables.COUNT };
+
+		for (int i = 0; i < SUMMARIZATION_MENU.length; i++) {
+			sheet.setColumnWidth(i, COLUMN_WIDTH);
+			;
 		}
 		int rowCnt = 0;
 		int cellCnt = 0;
 		// write first menu
 		row = sheet.createRow(rowCnt);
-		for(String str : SUMMARIZATION_MENU) {
-			cell = row.createCell(cellCnt);	
+		for (String str : SUMMARIZATION_MENU) {
+			cell = row.createCell(cellCnt);
 			cell.setCellValue(str);
 			cellCnt += 1;
 		}
-		
-		for(CompSummarization comSum : sumList) {
+
+		for (CompSummarization comSum : sumList) {
 			rowCnt++;
 			cellCnt = 0;
 			row = sheet.createRow(rowCnt);
-			XSSFSheet xsheet = (XSSFSheet)sheet;
+			XSSFSheet xsheet = (XSSFSheet) sheet;
 			ArrayList<Object> info = (ArrayList<Object>) comSum.getInfo();
-			for(Object obj : info) {
+			for (Object obj : info) {
 				cell = row.createCell(cellCnt);
-				if(obj.getClass() == String.class)
+				if (obj.getClass() == String.class)
 					cell.setCellValue(obj.toString());
-				else if(obj.getClass() == Integer.class) {
+				else if (obj.getClass() == Integer.class) {
 					cell.setCellValue(obj.toString());
-				}
-				else if(obj.getClass() == Float.class) {
-					cell.setCellValue(Utils.fmt((float)obj));
+				} else if (obj.getClass() == Float.class) {
+					cell.setCellValue(Utils.fmt((float) obj));
 				}
 				CellReference cellR = new CellReference(cell);
 				xsheet.addIgnoredErrors(cellR, IgnoredErrorType.NUMBER_STORED_AS_TEXT);
@@ -271,152 +344,155 @@ public class ExcelWriter extends ExcelBase{
 			}
 		}
 	}
-	public void writeCNC(LinkedHashMap <SpecSegmentation, Integer> CNCList, HashMap<String, String> textureHash) {
+
+	public void writeCNC(LinkedHashMap<SpecSegmentation, Integer> CNCList, HashMap<String, String> textureHash) {
 		Sheet sheet;
-		
+
 		// remove old CNC sheet
-		if(isCNCExist()) {
+		if (isCNCExist()) {
 			System.out.println("Remove old CNC from sheet (移除舊的CNC頁面)");
 			removeAllCNC();
 		}
 		// create new CNC sheet
 		ArrayList<Integer> cncSheet = new ArrayList<Integer>();
 		for (Entry<SpecSegmentation, Integer> entry : CNCList.entrySet()) {
-//			System.out.println(entry.getKey() + ":" + entry.getValue().toString());
+			// System.out.println(entry.getKey() + ":" + entry.getValue().toString());
 			int serialNumber = Integer.parseInt(entry.getKey().getFirstComponent().toString().split("M")[0]);
-			if(!cncSheet.contains(serialNumber)) {
+			if (!cncSheet.contains(serialNumber)) {
 				cncSheet.add(serialNumber);
 			}
 		}
 		HashMap<String, Integer> shiftMap = new HashMap<String, Integer>();
 		Collections.sort(cncSheet);
-		for(Integer serialNumber : cncSheet) {
+		for (Integer serialNumber : cncSheet) {
 			String sheetName = serialNumber.toString() + "M";
 			wb.createSheet(sheetName);
 			shiftMap.put(sheetName, 0);
 		}
-		
-		
-		for(Entry<SpecSegmentation, Integer> entry : CNCList.entrySet()) {
+
+		for (Entry<SpecSegmentation, Integer> entry : CNCList.entrySet()) {
 			String componentReference = entry.getKey().getFirstComponent();
 			String sheetName = componentReference.toString().split("M")[0] + "M";
 			sheet = wb.getSheet(sheetName);
-			int shiftIdx = shiftMap.get(sheetName) ;
+			int shiftIdx = shiftMap.get(sheetName);
 			createCNCBlock(sheet, shiftIdx * SHIFT);
 			String texture = textureHash.get(componentReference);
 			fillCNCBlock(sheet, shiftIdx, entry, texture);
-			shiftMap.replace(sheetName, (shiftIdx+1));
-			
+			shiftMap.replace(sheetName, (shiftIdx + 1));
+
 		}
-		
+
 	}
+
 	public void setConnection(HashMap<String, ArrayList<ConnectionInfo>> connectionInfo) {
 		this.connectionInfo = connectionInfo;
 	}
+
 	private void createCNCBlock(Sheet sheet, int shift) {
 		Row row;
-		for(int i=0 ; i < cncTable.getMaxRow() ; i ++) {
+		for (int i = 0; i < cncTable.getMaxRow(); i++) {
 			row = sheet.createRow(shift + i);
-			for(int j=0 ; j <cncTable.getMaxColumn() ; j++) {
+			for (int j = 0; j < cncTable.getMaxColumn(); j++) {
 				row.createCell(j);
 			}
 		}
-		for (int i =0 ; i<  cncTable.getMaxColumn() ; i++) {
-		    sheet.setColumnWidth(i, COLUMN_WIDTH);;
+		for (int i = 0; i < cncTable.getMaxColumn(); i++) {
+			sheet.setColumnWidth(i, COLUMN_WIDTH);
+			;
 		}
 		// merge range
 		ArrayList<Pair<Point, Point>> mergeList = this.cncTable.getMergeRange();
-        for(Pair<Point, Point> range : mergeList) {
-        	sheet.addMergedRegion(new CellRangeAddress(range.getFirst().getRow() + shift, range.getSecond().getRow() + shift, 
-        			range.getFirst().getColumn(),range.getSecond().getColumn()));
-        }
+		for (Pair<Point, Point> range : mergeList) {
+			sheet.addMergedRegion(new CellRangeAddress(range.getFirst().getRow() + shift,
+					range.getSecond().getRow() + shift, range.getFirst().getColumn(), range.getSecond().getColumn()));
+		}
 	}
-	private void fillCNCBlock(Sheet sheet, int shiftIdx, Entry<SpecSegmentation, Integer> entry , String texture) {
+
+	private void fillCNCBlock(Sheet sheet, int shiftIdx, Entry<SpecSegmentation, Integer> entry, String texture) {
 		fillCNCInfo(sheet, shiftIdx, entry, texture);
 		plotCNCTable(sheet, shiftIdx * SHIFT);
 		advancedLayout(sheet, shiftIdx * SHIFT);
 	}
+
 	private void fillCNCInfo(Sheet sheet, int shiftIdx, Entry<SpecSegmentation, Integer> entry, String texture) {
 		CNCInfo cncInfo = new CNCInfo(shiftIdx, entry, texture);
 		List<Object> infoList = cncInfo.getInfo();
 		List<Object> locationList = cncInfo.getLayout();
 		Row row = null;
 		Cell cell = null;
-		
+
 		// fill text
 		Iterator<Object> iter = locationList.iterator();
-		for(Object obj : infoList) {
-	        Point point;
-			if(iter.hasNext()) {
-				point = (Point)iter.next();
-				row = sheet.getRow(point.getRow()+shiftIdx * SHIFT);
+		for (Object obj : infoList) {
+			Point point;
+			if (iter.hasNext()) {
+				point = (Point) iter.next();
+				row = sheet.getRow(point.getRow() + shiftIdx * SHIFT);
 				cell = row.getCell(point.getColumn());
-				if(obj.getClass() == String.class) {
+				if (obj.getClass() == String.class) {
 					cell.setCellValue(obj.toString());
-				}
-				else if(obj.getClass() == Integer.class) {
+				} else if (obj.getClass() == Integer.class) {
 					cell.setCellValue(obj.toString());
-				}else if(obj.getClass() == Float.class) {
-					cell.setCellValue(Utils.fmt((float)obj));
+				} else if (obj.getClass() == Float.class) {
+					cell.setCellValue(Utils.fmt((float) obj));
 				}
-				
-				XSSFSheet xsheet = (XSSFSheet)sheet;
+
+				XSSFSheet xsheet = (XSSFSheet) sheet;
 				CellReference cellR = new CellReference(cell);
 				xsheet.addIgnoredErrors(cellR, IgnoredErrorType.NUMBER_STORED_AS_TEXT);
 			}
 		}
-		if(connectionInfo!=null) {
+		if (connectionInfo != null) {
 			ArrayList<ConnectionInfo> cncConnList = getCNCConn(cncInfo.getCompSumList());
 			fillCNCConn(sheet, shiftIdx * SHIFT, cncConnList);
 		}
 	}
-	
 
 	private void plotCNCTable(Sheet sheet, int shift) {
 		List<Object> infoList = this.cncTable.getInfo();
 		List<Object> locationList = this.cncTable.getLayout();
 		Row row = null;
 		Cell cell = null;
-		
+
 		// fill text
 		Iterator<Object> iter = locationList.iterator();
-		for(Object obj : infoList) {
-	        Point point;
-			if(iter.hasNext()) {
-				point = (Point)iter.next();
-				row = sheet.getRow(point.getRow()+shift);
+		for (Object obj : infoList) {
+			Point point;
+			if (iter.hasNext()) {
+				point = (Point) iter.next();
+				row = sheet.getRow(point.getRow() + shift);
 				cell = row.getCell(point.getColumn());
-				if(obj.getClass() == String.class) {
+				if (obj.getClass() == String.class) {
 					cell.setCellValue(obj.toString());
-				}
-				else if(obj.getClass() == Integer.class) {
+				} else if (obj.getClass() == Integer.class) {
 					cell.setCellValue(obj.toString());
 				}
 				cell.setCellStyle(style);
-				XSSFSheet xsheet = (XSSFSheet)sheet;
+				XSSFSheet xsheet = (XSSFSheet) sheet;
 				CellReference cellR = new CellReference(cell);
 				xsheet.addIgnoredErrors(cellR, IgnoredErrorType.NUMBER_STORED_AS_TEXT);
 			}
 		}
-		// plot wire frame 
+		// plot wire frame
 		ArrayList<Pair<Point, Point>> frameList = this.cncTable.getWireFrameeRange();
-        for(Pair<Point, Point> range : frameList) {
-        	for(int i = range.getFirst().getRow() ; i <= range.getSecond().getRow() ; i ++) {
-        		row = sheet.getRow(i + shift);
-        		for(int j = range.getFirst().getColumn() ; j<= range.getSecond().getColumn() ; j ++) {
-        			cell = row.getCell(j);
-        			cell.setCellStyle(borderStyle);
-        		}
-        	}
-        }
+		for (Pair<Point, Point> range : frameList) {
+			for (int i = range.getFirst().getRow(); i <= range.getSecond().getRow(); i++) {
+				row = sheet.getRow(i + shift);
+				for (int j = range.getFirst().getColumn(); j <= range.getSecond().getColumn(); j++) {
+					cell = row.getCell(j);
+					cell.setCellStyle(borderStyle);
+				}
+			}
+		}
 	}
+
 	private void fillCNCConn(Sheet sheet, int shift, ArrayList<ConnectionInfo> cncConnList) {
 		int cncRowStart = cncTable.getCNCTableStart() + shift;
 		// 0 for left, 1 for right
-		Point positions[] = {new Point(cncRowStart, 7), new Point(cncRowStart, 9)};
+		Point positions[] = { new Point(cncRowStart, 7), new Point(cncRowStart, 9) };
 		int leftOrRight = 1;
-		
-		for(ConnectionInfo conn : cncConnList) {
+
+		for (ConnectionInfo conn : cncConnList) {
 			Row row;
 			Cell cell;
 			List<Object> info = conn.getInfo();
@@ -425,39 +501,35 @@ public class ExcelWriter extends ExcelBase{
 			int putColIdx = positions[leftOrRight].getColumn();
 			row = sheet.getRow(putRowIdx);
 			cell = row.getCell(putColIdx);
-			
+
 			// for menu
-			sheet.addMergedRegion(new CellRangeAddress(putRowIdx, putRowIdx, 
-					putColIdx, putColIdx+1));
+			sheet.addMergedRegion(new CellRangeAddress(putRowIdx, putRowIdx, putColIdx, putColIdx + 1));
 			row.getCell(putColIdx).setCellStyle(borderStyle);
-			row.getCell(putColIdx+1).setCellStyle(borderStyle);
-			
+			row.getCell(putColIdx + 1).setCellStyle(borderStyle);
+
 			cell.setCellValue(info.get(0).toString());
 			putRowIdx++;
-			
+
 			// prepare for next
-			int tableLength = (int)((conn.getInfo().size()+1)/2);
+			int tableLength = (int) ((conn.getInfo().size() + 1) / 2);
 			positions[leftOrRight].jumpRow(tableLength);
 			// fill content
-			for(int i=1 ; i<tableLength ; i++) {
+			for (int i = 1; i < tableLength; i++) {
 				row = sheet.getRow(putRowIdx);
 				putColIdx = positions[leftOrRight].getColumn();
-				for(int j=0 ; j<2 ; j++) {
+				for (int j = 0; j < 2; j++) {
 					cell = row.getCell(putColIdx);
-					if(info.get((i*2)-1+j).getClass() == String.class) {
-						cell.setCellValue(info.get((i*2)-1+j).toString());
+					if (info.get((i * 2) - 1 + j).getClass() == String.class) {
+						cell.setCellValue(info.get((i * 2) - 1 + j).toString());
+					} else if (info.get((i * 2) - 1 + j).getClass() == Integer.class) {
+						cell.setCellValue(info.get((i * 2) - 1 + j).toString());
+					} else if (info.get((i * 2) - 1 + j).getClass() == Float.class) {
+						cell.setCellValue(Utils.fmt((float) info.get((i * 2) - 1 + j)));
+					} else if (info.get((i * 2) - 1 + j).getClass() == Double.class) {
+						cell.setCellValue(Utils.fmt((double) info.get((i * 2) - 1 + j)));
 					}
-					else if(info.get((i*2)-1+j).getClass() == Integer.class) {
-						cell.setCellValue(info.get((i*2)-1+j).toString());
-					}
-					else if(info.get((i*2)-1+j).getClass() == Float.class) {
-						cell.setCellValue(Utils.fmt((float)info.get((i*2)-1+j)));
-					}
-					else if(info.get((i*2)-1+j).getClass() == Double.class) {
-						cell.setCellValue(Utils.fmt((double)info.get((i*2)-1+j)));
-					}
-//					cell.setCellValue(info.get((i*2)-1+j).toString());
-					XSSFSheet xsheet = (XSSFSheet)sheet;
+					// cell.setCellValue(info.get((i*2)-1+j).toString());
+					XSSFSheet xsheet = (XSSFSheet) sheet;
 					CellReference cellR = new CellReference(cell);
 					xsheet.addIgnoredErrors(cellR, IgnoredErrorType.NUMBER_STORED_AS_TEXT);
 					cell.setCellStyle(borderStyle);
@@ -467,29 +539,31 @@ public class ExcelWriter extends ExcelBase{
 			}
 		}
 	}
+
 	private void advancedLayout(Sheet sheet, int shift) {
 		// refer to CNCLocation for more information
-		
+
 		// for material count
-		Row row = sheet.getRow(11+shift);
+		Row row = sheet.getRow(11 + shift);
 		Cell cell = row.getCell(7);
 		cell.setCellStyle(redStyle);
 		cell = row.getCell(9);
 		cell.setCellStyle(redStyle);
 	}
-	private ArrayList<ConnectionInfo> getCNCConn(ArrayList<CompSummarization> compSumList){
+
+	private ArrayList<ConnectionInfo> getCNCConn(ArrayList<CompSummarization> compSumList) {
 		ArrayList<ConnectionInfo> CNCConn = new ArrayList<ConnectionInfo>();
-		for(CompSummarization comSum : compSumList) {
-			
+		for (CompSummarization comSum : compSumList) {
+
 			ArrayList<ConnectionInfo> connInfo = connectionInfo.get(comSum.getMaterial());
-			if(connInfo==null) {
+			if (connInfo == null) {
 				continue;
 			}
-			for(ConnectionInfo conn : connInfo) {
-				if(conn==null) {
+			for (ConnectionInfo conn : connInfo) {
+				if (conn == null) {
 					continue;
 				}
-				if(!CNCConn.contains(conn)) {
+				if (!CNCConn.contains(conn)) {
 					CNCConn.add(conn);
 				}
 			}
@@ -498,20 +572,22 @@ public class ExcelWriter extends ExcelBase{
 	}
 
 	public void removeSheetByName(String sheetname) {
-		for(int i = 0 ; i<this.wb.getNumberOfSheets() ; i++) {
-			if(sheetname.equals(wb.getSheetName(i))) {
+		for (int i = 0; i < this.wb.getNumberOfSheets(); i++) {
+			if (sheetname.equals(wb.getSheetName(i))) {
 				wb.removeSheetAt(i);
 			}
 		}
 	}
+
 	public void removeAllCNC() {
-		for(int i = this.wb.getNumberOfSheets() - 1 ; i>=0 ; i--) {
+		for (int i = this.wb.getNumberOfSheets() - 1; i >= 0; i--) {
 			CharSequence chSeq = "M";
-			if(wb.getSheetName(i).contains(chSeq)) {
+			if (wb.getSheetName(i).contains(chSeq)) {
 				wb.removeSheetAt(i);
 			}
 		}
 	}
+
 	public void save() {
 		try {
 			FileOutputStream fileOut = new FileOutputStream(fileName);
@@ -526,14 +602,14 @@ public class ExcelWriter extends ExcelBase{
 			e.printStackTrace();
 		}
 	}
+
 	public boolean isCNCExist() {
-		for(Sheet sheet : wb) {
+		for (Sheet sheet : wb) {
 			CharSequence chSeq = "M";
-			if(sheet.getSheetName().contains(chSeq))
+			if (sheet.getSheetName().contains(chSeq))
 				return true;
 		}
 		return false;
 	}
-	
-	
+
 }
