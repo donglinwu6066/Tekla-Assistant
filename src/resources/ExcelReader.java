@@ -1,5 +1,6 @@
 package resources;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -281,5 +282,13 @@ public class ExcelReader extends ExcelBase {
 			hash.put(component, texture);
 		}
 		return hash;
+	}
+	public void close() {
+		try {
+			wb.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

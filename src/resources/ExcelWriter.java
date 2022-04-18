@@ -117,10 +117,10 @@ public class ExcelWriter extends ExcelBase {
 				cellCnt += 1;
 			}
 		}
+		updatewb();
 	}
 
 	public void updateNCL(ArrayList<Component> ncl) {
-		// update ncl in variables.PREDICTION(length)
 		Sheet sheet;
 		System.out.println("Update sheet " + variables.PREDICTION + "(更新" + variables.PREDICTION + "頁面)");
 		sheet = wb.getSheet(variables.PREDICTION);
@@ -129,32 +129,24 @@ public class ExcelWriter extends ExcelBase {
 		int COL_MAX_CNT = SpecSegmentation.MAX_A4_COLUMN;
 
 		XSSFSheet xsheet = (XSSFSheet) sheet;
-//		int lastRowNum = sheet.getLastRowNum();
 		Iterator<Row> rows = sheet.rowIterator();
-//		for(int j=1 ; j<=lastRowNum ; j++) {
 		while(rows.hasNext()) {
-//			Row row = sheet.getRow(j);
 			Row row = rows.next();
 			for (int i = colCnt; i < colCnt + COL_MAX_CNT; i++) {
 				Cell cell = row.getCell(i);
 				if (cell != null && cell.getCellType() == CellType.STRING) {
 					String cellStr = cell.getStringCellValue();
 					if (cellStr.contains("M")) {
-//						System.out.println("(" + row.getRowNum() + ", " + cell.getColumnIndex() + ")");
-//						System.out.println("(" + row.getRowNum() + ", " + (i + 1) + ")");
 						boolean unfound = true;
 						Cell specLenC;
 						if (row.getCell(i + 1) == null) {
-//							System.out.println("null");
 							specLenC = row.createCell(i + 1);
 						} else {
-//							System.out.println("blank");
 							specLenC = row.getCell(i + 1);
 						}
 
 						for (Component component : ncl) {
 							if (component.component.equals(cellStr)) {
-//								System.out.println("set (" + row.getRowNum() + ", " + (i + 1) + ") as "+Utils.fmt((float) component.length));
 								specLenC.setCellValue(Utils.fmt((float) component.length));
 								CellReference cellR = new CellReference(specLenC);
 								xsheet.addIgnoredErrors(cellR, IgnoredErrorType.NUMBER_STORED_AS_TEXT);
@@ -175,18 +167,7 @@ public class ExcelWriter extends ExcelBase {
 			}
 		}
 		XSSFFormulaEvaluator.evaluateAllFormulaCells(wb);
-		try {
-			FileOutputStream fileOut = new FileOutputStream(fileName);
-			wb.write(fileOut);
-			fileOut.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		// wb.setForceFormulaRecalculation(true);
+		updatewb();
 	}
 
 	// for prediction sheet
@@ -199,11 +180,8 @@ public class ExcelWriter extends ExcelBase {
 			removeSheetByName(variables.PREDICTION);
 		}
 		System.out.println("Create new sheet " + variables.PREDICTION + "(創造新的" + variables.PREDICTION + "頁面)");
-		// for(SpecSegmentation item : sym) {
-		// System.out.println(item);
-		// }
 		sheet = wb.createSheet(variables.PREDICTION);
-		// add new COMPONENTS_SPECIFICATION here
+
 		Row row = null;
 		Cell cell = null;
 		int rowCnt = 0;
@@ -293,7 +271,7 @@ public class ExcelWriter extends ExcelBase {
 				xsheet.addIgnoredErrors(cellR, IgnoredErrorType.NUMBER_STORED_AS_TEXT);
 			}
 		}
-
+		updatewb();
 	}
 
 	public void writeSum(ArrayList<CompSummarization> sumList) {
@@ -595,14 +573,33 @@ public class ExcelWriter extends ExcelBase {
 			fileOut.close();
 			wb.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-
+	public void updatewb() {
+		try {
+			FileOutputStream fileOut = new FileOutputStream(fileName);
+			wb.write(fileOut);
+			fileOut.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	public void saveOld() {
+		try {
+			FileOutputStream fileOut = new FileOutputStream(fileName+".old");
+			wb.write(fileOut);
+			fileOut.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	public boolean isCNCExist() {
 		for (Sheet sheet : wb) {
 			CharSequence chSeq = "M";
