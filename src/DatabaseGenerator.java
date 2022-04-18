@@ -75,6 +75,7 @@ public class DatabaseGenerator {
 		System.out.println("DatabaseGenerator successes(" + variables.COMPONENTS_SPECIFICATION + "與"
 				+ variables.PREDICTION + "報表完成)\n");
 	}
+	
 
 
 }

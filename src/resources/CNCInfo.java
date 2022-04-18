@@ -56,7 +56,7 @@ public class CNCInfo implements CellOutput{
 		
 		float check = 10 + 3;
 		for(CompSummarization comSum : compSumList) {
-			check += comSum.useLength()+3;
+			check += comSum.useLength()+3*comSum.count;
 		}
 		this.check = check;
 		

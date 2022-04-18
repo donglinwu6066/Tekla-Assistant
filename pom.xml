@@ -133,7 +133,7 @@
 								false
 							</appendAssemblyId>
 							<finalName>
-								CNCGenerator-2.7
+								CNCGenerator-2.7.1
 							</finalName>
 						</configuration>
 						<phase>
