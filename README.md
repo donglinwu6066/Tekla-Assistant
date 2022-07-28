@@ -12,3 +12,4 @@
 * 2.7: new feature, update ncl
 * 2.7.1: bugfixes
 * 2.8: update components sheet correctly, improve loading excel, display mode 
+* 2.8.1: fixed prediction compact mode

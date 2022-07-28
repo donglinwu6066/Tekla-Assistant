@@ -17,7 +17,6 @@ public class ExcelReader extends ExcelBase {
 	public ExcelReader(String fileName) {
 		super(fileName);
 	}
-
 	public LinkedHashMap<SpecSegmentation, Integer> readPrediction() {
 		Sheet sheet = wb.getSheet(variables.PREDICTION);
 		Iterator<Row> rows = sheet.rowIterator();
@@ -66,7 +65,7 @@ public class ExcelReader extends ExcelBase {
 				dataFormat = SpecSegmentation.listFormat.COMPACTED;
 			}
 			// add component in pair
-			while (!item.isEmpty()) {
+			while (!item.isEmpty() && item.size()>1) {
 				if (dataFormat == SpecSegmentation.listFormat.GENERAL) {
 					specSeg.addComponent(new Pair<String, Float>(item.get(0), Float.parseFloat(item.get(1))));
 					item.remove(0);
